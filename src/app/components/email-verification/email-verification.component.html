@@ -1,0 +1,21 @@
+<div class="verification-container">
+  <div class="verification-card">
+    <h2>تأكيد البريد الإلكتروني</h2>
+
+    <div *ngIf="isLoading" class="loading-message">
+      جاري تأكيد البريد الإلكتروني...
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-message">
+      <div class="success-icon">✓</div>
+      <p>{{ successMessage }}</p>
+      <button routerLink="/login" class="login-button">
+        تسجيل الدخول
+      </button>
+    </div>
+  </div>
+</div> 

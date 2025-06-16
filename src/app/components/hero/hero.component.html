@@ -1,0 +1,19 @@
+<section class="hero">
+  <div class="hero-content animate-slide-in">
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+    <button routerLink="/products" role="button" aria-label="تصفح المنتجات" 
+      class="cta-button">{{ ctaText }}</button>
+  </div>
+  <div class="hero-image animate-float">
+    <div
+      *ngFor="let f of flowers"
+      class="flower"
+      [@randomAppear]="{ value: '', params: { delay: f.delay, easing: 'cubic-bezier(.36,.66,.04,1)' } }"
+      [style.left.px]="f.x"
+      [style.top.px]="f.y"
+    >
+    </div>
+    <img src="/assets/images/img1.png" alt="زجاجة عطر فاخرة">
+  </div>
+</section> 

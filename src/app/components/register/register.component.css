@@ -1,0 +1,100 @@
+.auth-container {
+    max-width: 400px;
+    margin: 3rem auto;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 24px rgba(231, 76, 60, 0.08);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+  .auth-title {
+    font-size: 2rem;
+    color: #e74c3c;
+    margin-bottom: 2rem;
+    font-family: 'Cairo', sans-serif;
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .form-group {
+    text-align: right;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #34495e;
+    font-weight: 600;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fafafa;
+    transition: border 0.2s;
+  }
+  .form-group input:focus {
+    border: 1.5px solid #e74c3c;
+    outline: none;
+  }
+
+
+
+  
+  .auth-button {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    padding: 0.7rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.08);
+  }
+  .auth-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .auth-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 8px 24px rgba(231, 76, 60, 0.18);
+  }
+  .auth-link {
+    margin-top: 1.5rem;
+    font-size: 1rem;
+  }
+  .auth-link a {
+    color: #e74c3c;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+.auth-button {
+  position: relative;
+  min-height: 2.8rem;
+}
+
+.auth-button span {
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+
+.auth-button[disabled] {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

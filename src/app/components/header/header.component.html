@@ -1,0 +1,75 @@
+<header class="header">
+  <nav class="navbar">
+    <div class="logo">
+      <img src="assets/images/EZZlogo.jpeg" alt="Logo" height="90px">
+    </div>
+    <button class="hamburger" (click)="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links">
+      <li *ngFor="let link of navLinks">
+        <a 
+          [routerLink]="link.path" 
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          >{{ link.label }}</a>
+      </li>
+    </ul>
+    <div class="header-actions">
+      <button class="cart-button" routerLink="/cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count">{{totalItems}}</span>
+      </button>
+      <button
+        class="login-button"
+        routerLink="/login"
+        *ngIf="!isAuthenticated"
+      >
+        <i class="fas fa-user"></i> تسجيل
+      </button>
+      <button
+        class="logout-button"
+        (click) ="logout()"
+        *ngIf="isAuthenticated"
+      >
+        <i class="fas fa-sign-out-alt"></i> خروج
+      </button>
+    </div>
+
+  </nav>
+  <div class="sidebar" [class.open]="sidebarOpen">
+    <button class="close-btn" (click)="toggleSidebar()">&times;</button>
+    <ul>
+      <li *ngFor="let link of navLinks">
+        <a (click)="toggleSidebar()"
+        [routerLink]="link.path" routerLinkActive="active" 
+        [routerLinkActiveOptions]="{ exact: link.exact }"
+        >{{ link.label }}
+        </a>
+        <br>
+      </li>
+      <hr>
+      <li>
+        <a (click)="toggleSidebar()" [routerLink]="'/cart'" class="sidebar-link">العربة</a>
+      </li>
+      <li>
+        <a
+          *ngIf="!isAuthenticated"
+          (click)="toggleSidebar()"
+          [routerLink]="'/login'"
+          class="sidebar-link"
+        >
+          تسجيل/دخول
+        </a>
+        <a
+          *ngIf="isAuthenticated"
+          (click)="logout();toggleSidebar();"
+          class="sidebar-link"
+        >
+          خروج
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="toggleSidebar()"></div>
+</header>

@@ -1,0 +1,31 @@
+<section class="categories">
+  <div class="container">
+    <h2 class="section-title">تصفح حسب التصنيف</h2>
+    <div class="categories-grid">
+      <div class="category-card" *ngFor="let category of categories">
+        <div class="category-image">
+          <img [src]="category.image" [alt]="category.name">
+          <div class="category-overlay">
+            <div class="category-stats">
+              <div class="stat">
+                <i class="fas fa-box"></i>
+                <span>{{ category.productCount || 0 }} منتج</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="category-info">
+          <div class="category-header">
+            <h3>{{ category.name }}</h3>
+            <span class="category-badge">{{ category.productCount || 0 }} منتج</span>
+          </div>
+          <p class="category-description">{{ category.description }}</p>
+          <a [routerLink]="['/products']" [queryParams]="{category: category.id}" class="explore-button">
+            <span>تصفح المنتجات</span>
+            <i class="fas fa-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> 

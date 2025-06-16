@@ -1,0 +1,80 @@
+<div class="products-container">
+  <div class="products-layout">
+    <!-- Side Filters -->
+    <div class="side-filters">
+      <div class="filter-section">
+        <h3>التصنيفات</h3>
+        <div class="category-filters">
+          <label *ngFor="let cat of categories" class="category-option">
+            <input type="checkbox" 
+                    [checked]="selectedCategories.includes(cat.id)"
+                    (change)="toggleCategory(cat.id)">
+            {{ cat.name }}
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3>نطاق السعر</h3>
+        <div class="price-range">
+          <input type="range" 
+                  [min]="minPrice" 
+                  [max]="maxPrice" 
+                  [(ngModel)]="priceRange" 
+                  (input)="filterProducts()">
+          <div class="price-inputs">
+            <input type="number" 
+                    [(ngModel)]="priceRange" 
+                    (input)="filterProducts()" 
+                    [min]="minPrice" 
+                    [max]="maxPrice">
+            <span>دينار</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="search-bar">
+        <input type="text" 
+                [(ngModel)]="searchTerm" 
+                placeholder="البحث عن منتج..." 
+                (input)="filterProducts()">
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let product of filteredProducts">
+          <div class="product-image">
+            <img [src]="product.images?.[0]?.imageUrl || '/assets/images/placeholder.jpg'" [alt]="product.title">
+          </div>
+          <div class="product-info">
+            <h3>{{ product.title }}</h3>
+            <p class="description">{{ product.description }}</p>
+            <div class="product-meta price-container">
+              <!-- <span class="price">{{ product.price | currency:'EGP' }}</span> -->
+              <span class="price">{{ product.price }}</span>
+              <span class="currency">دينار</span>
+            </div>
+            <div class="product-meta">
+              <span class="stock">المخزون: {{ product.stock }}</span>
+            </div>
+            <div class="category">
+              <span class="category-badge">{{ product.category?.name || 'بدون تصنيف' }}</span>
+            </div>
+          </div>
+          <div class="product-actions">
+            <button class="add-to-cart" (click)="addToCart(product)">إضافة إلى السلة</button>
+            <a [routerLink]="['/products', product.id]" class="view-details">عرض التفاصيل</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-products" *ngIf="filteredProducts.length === 0">
+        <p>لم يتم العثور على منتجات تطابق معايير البحث</p>
+      </div>
+    </div>
+  </div>
+</div>
+

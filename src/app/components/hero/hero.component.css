@@ -1,0 +1,127 @@
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, var(--light-bg) 0%, #fff 100%);
+  display: relative;
+}
+
+.hero-content {
+  flex: 1;
+  padding-right: 2rem;
+}
+
+.hero-content h2 {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: var(--text-color);
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.hero-image {
+  flex: 1;
+  text-align: center;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding-top: 8rem;
+  }
+
+  .hero-content {
+    padding-right: 0;
+    margin-bottom: 2rem;
+  }
+} 
+
+/* .flowers-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+
+/* .flower {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+} */
+
+/* Arrange in a circular shape */
+/* .flower:nth-child(1) { transform: translate(40px, 0); }
+.flower:nth-child(2) { transform: translate(-40px, 0); } */
+
+/* @keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+} */
+
+/* .flowers-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200px;
+  height: 200px;
+  animation: spin 10s linear infinite alternate;
+} */
+
+@keyframes spin {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(7px); }
+}
+/* 
+
+.flower {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  z-index: 10;
+} */
+
+/* توزيع الزهور على شكل دائرة */
+/* .flower-1 { bottom: 0; left: 0; }    
+.flower-2 { bottom: 0; left: -80; }    */
+
+
+.flower {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  font-size: 3rem;    /* if using emoji for demo */
+  pointer-events: none;
+  animation: spin 2s linear infinite alternate;
+  z-index: 1;
+}

@@ -1,0 +1,64 @@
+<div class="admin-categories">
+  <div class="header">
+    <h1>إدارة التصنيفات</h1>
+    <button class="add-button" (click)="openModal()">إضافة تصنيف جديد</button>
+  </div>
+
+  <div class="filters">
+    <div class="search-box">
+      <input type="text" [(ngModel)]="searchTerm" (input)="filterCategories()" placeholder="بحث عن تصنيف...">
+    </div>
+  </div>
+
+  <div class="categories-grid">
+    <div class="category-card" *ngFor="let category of filteredCategories">
+      <div class="category-image">
+        <img [src]="category.image || '/assets/images/placeholder.jpg'" [alt]="category.name">
+      </div>
+      <div class="category-info">
+        <h3>{{ category.name }}</h3>
+        <p class="description">{{ category.description }}</p>
+      </div>
+      <div class="category-actions">
+        <button class="edit" (click)="editCategory(category)">تعديل</button>
+        <button class="delete" (click)="deleteCategory(category.id)">حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-modal" *ngIf="isModalOpen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>{{ selectedCategory ? 'تعديل تصنيف' : 'إضافة تصنيف جديد' }}</h2>
+        <button class="close-button" (click)="closeModal()">×</button>
+      </div>
+      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="name">اسم التصنيف</label>
+          <input type="text" id="name" formControlName="name">
+          <div class="error-message" *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+            اسم التصنيف مطلوب ويجب أن يكون 3 أحرف على الأقل
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">الوصف</label>
+          <textarea id="description" formControlName="description" rows="4"></textarea>
+          <div class="error-message" *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched">
+            الوصف مطلوب ويجب أن يكون 10 أحرف على الأقل
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="image">الصورة</label>
+          <input type="file" id="image" (change)="onImageUpload($event)" accept="image/*">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="cancel" (click)="closeModal()">إلغاء</button>
+          <button type="submit" [disabled]="!categoryForm.valid">حفظ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>اتصل بنا</h3>
+      <p>البريد الإلكتروني: info&#64;atar.com</p>
+      <p>الهاتف: +123456789</p>
+    </div>
+    <div class="footer-section">
+      <h3>تابعنا</h3>
+      <div class="social-links">
+        <a *ngFor="let link of socialLinks" [href]="link.url">
+          <i [class]="link.icon"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>جميع الحقوق محفوظة © 2025 متجر عز</p>
+  </div>
+</footer> 

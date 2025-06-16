@@ -1,1 +1,123 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+@import 'ngx-toastr/toastr';
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Cairo', sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #faf6f2;
+}
+
+/* Variables */
+:root {
+  --primary-color: #8B4513; /* لون العود العميق */
+  --secondary-color: #D4AF37; /* لون ذهبي فاخر */
+  --accent-color: #4B0082; /* لون أرجواني عميق للرفاهية */
+  --text-color: #2C1810; /* لون بني داكن للنصوص */
+  --light-bg: #FFF8F0; /* خلفية فاتحة دافئة */
+  --dark-bg: #2C1810; /* خلفية داكنة للتباين */
+  --card-bg: #FFFFFF; /* خلفية البطاقات */
+  --gradient-primary: linear-gradient(135deg, #8B4513 0%, #5C2C0C 100%);
+  --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  --gradient-purple: linear-gradient(135deg, #4B0082 0%, #2E0854 100%);
+  --shadow-sm: 0 2px 10px rgba(44, 24, 16, 0.1);
+  --shadow-md: 0 5px 20px rgba(44, 24, 16, 0.15);
+  --shadow-lg: 0 10px 30px rgba(44, 24, 16, 0.2);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: 'Poppins', sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-in-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Luxury Theme Elements */
+.luxury-card {
+  background: var(--card-bg);
+  border-radius: 15px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease;
+}
+
+.luxury-card:hover {
+  transform: translateY(-5px);
+}
+
+.gold-border {
+  border: 2px solid var(--secondary-color);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}

@@ -1,0 +1,101 @@
+<div class="admin-dashboard">
+  <div class="header">
+    <h1>لوحة التحكم</h1>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-info">
+        <h3>المنتجات</h3>
+        <p class="stat-value">{{ totalProducts }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🏷️</div>
+      <div class="stat-info">
+        <h3>التصنيفات</h3>
+        <p class="stat-value">{{ totalCategories }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <h3>المستخدمين</h3>
+        <p class="stat-value">{{ totalUsers }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🛒</div>
+      <div class="stat-info">
+        <h3>الطلبات</h3>
+        <p class="stat-value">{{ totalOrders }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="recent-orders">
+    <div class="section-header">
+      <h2>آخر الطلبات</h2>
+      <a routerLink="/admin/orders" class="view-all">عرض الكل</a>
+    </div>
+
+    <div class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>المستخدم</th>
+            <th>المبلغ</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of recentOrders">
+            <td>#{{ order.id }}</td>
+            <td>{{ order.user?.name }}</td>
+            <td>{{ order.total | currency:'EGP' }}</td>
+            <td>
+              <span class="status-badge" [class]="getStatusClass(order.status)">
+                {{ getStatusText(order.status) }}
+              </span>
+            </td>
+            <td>{{ order.createdAt | date:'short' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <div class="section-header">
+      <h2>إجراءات سريعة</h2>
+    </div>
+
+    <div class="actions-grid">
+      <a routerLink="/admin/products/" class="action-card">
+        <div class="action-icon">➕</div>
+        <h3>إضافة منتج</h3>
+      </a>
+
+      <a routerLink="/admin/categories/" class="action-card">
+        <div class="action-icon">🏷️</div>
+        <h3>إضافة تصنيف</h3>
+      </a>
+
+      <a routerLink="/admin/users/" class="action-card">
+        <div class="action-icon">👤</div>
+        <h3>إضافة مستخدم</h3>
+      </a>
+
+      <a routerLink="/admin/orders" class="action-card">
+        <div class="action-icon">📋</div>
+        <h3>إدارة الطلبات</h3>
+      </a>
+    </div>
+  </div>
+</div>

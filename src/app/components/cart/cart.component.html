@@ -1,0 +1,85 @@
+<div class="cart-container">
+  <div class="cart-header">
+    <h1>سلة التسوق</h1>
+    <p class="cart-summary">لديك {{ totalItems }} منتج في السلة</p>
+  </div>
+
+  <div class="cart-content" *ngIf="cartItems.length > 0">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <div class="item-image">
+          <img [src]="item.product.images?.[0]?.imageUrl" 
+                [alt]="item.product.title"
+                >
+                <!-- (error)="handleImageError($event)" -->
+        </div>
+        <div class="item-details">
+          <h3>{{ item.product.title }}</h3>
+          <div class="item-meta">
+            <span class="item-price">{{ item.product.price }} دينار</span>
+            <span class="item-category">{{ item.product.category?.name || 'بدون تصنيف' }}</span>
+          </div>
+          <div class="quantity-controls">
+            <button (click)="updateQuantity(item.product.id, item.quantity - 1)" 
+                    [disabled]="item.quantity <= 1">
+              <i class="fas fa-minus"></i>
+            </button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="updateQuantity(item.product.id, item.quantity + 1)"
+                    [disabled]="item.quantity >= item.product.stock">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="item-total">
+          <p>{{ item.product.price * item.quantity }} دينار</p>
+          <button class="remove-item" (click)="removeItem(item.product.id)" title="حذف المنتج">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <h2>ملخص الطلب</h2>
+      <div class="summary-row">
+        <span>عدد المنتجات:</span>
+        <span>{{ totalItems }}</span>
+      </div>
+      <div class="summary-row">
+        <span>تكلفة المنتجات:</span>
+        <span>{{ totalPrice }} دينار</span>
+      </div>
+      <div class="summary-row">
+        <span>تكلفة الشحن:</span>
+        <span>مجاني</span>
+      </div>
+      <div class="summary-row total">
+        <span>المجموع الكلي:</span>
+        <span>{{ totalPrice }} دينار</span>
+      </div>
+      <div class="cart-actions">
+        <button class="clear-cart" (click)="clearCart()">
+          <i class="fas fa-trash"></i>
+          مسح السلة
+        </button>
+        <button class="checkout" (click)="checkout()">
+          <i class="fas fa-shopping-cart"></i>
+          إتمام الطلب
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-cart" *ngIf="cartItems.length === 0">
+    <div class="empty-cart-content">
+      <i class="fas fa-shopping-cart"></i>
+      <h2>سلة التسوق فارغة</h2>
+      <p>لم تقم بإضافة أي منتجات إلى سلة التسوق بعد</p>
+      <a routerLink="/products" class="continue-shopping">
+        <i class="fas fa-arrow-left"></i>
+        متابعة التسوق
+      </a>
+    </div>
+  </div>
+</div>

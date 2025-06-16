@@ -1,0 +1,73 @@
+<div class="product-details-container" *ngIf="product">
+  <div class="product-gallery">
+    <div class="main-image">
+      <img [src]="getCurrentImage()" [alt]="product.title">
+    </div>
+    <div class="thumbnail-list" *ngIf="product.images && product.images.length > 1">
+      <div class="thumbnail" 
+           *ngFor="let image of product.images; let i = index"
+           [class.active]="i === selectedImageIndex"
+           (click)="selectImage(i)">
+        <img [src]="image.imageUrl" [alt]="product.title + ' - صورة ' + (i + 1)">
+      </div>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <div class="product-header">
+      <h1>{{ product.title }}</h1>
+      <div class="stock-status" [ngClass]="getStockStatus().class">
+        <i class="fas" [ngClass]="{
+          'fa-check-circle': getStockStatus().class === 'in-stock',
+          'fa-exclamation-circle': getStockStatus().class === 'low-stock',
+          'fa-times-circle': getStockStatus().class === 'out-of-stock'
+        }"></i>
+        {{ getStockStatus().text }}
+      </div>
+    </div>
+
+    <div class="price-section">
+      <div class="price">{{ product.price }} دينار</div>
+      <div class="category" *ngIf="product.category">
+        <i class="fas fa-tag"></i>
+        {{ product.category.name }}
+      </div>
+    </div>
+
+    <div class="description">
+      <h3>وصف المنتج</h3>
+      <p>{{ product.description }}</p>
+    </div>
+
+    <div class="purchase-section">
+      <div class="quantity-selector">
+        <button class="quantity-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1">
+          <i class="fas fa-minus"></i>
+        </button>
+        <input type="number" [(ngModel)]="quantity" min="1" [max]="product.stock" readonly>
+        <button class="quantity-btn" (click)="increaseQuantity()" [disabled]="quantity >= product.stock">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <button class="add-to-cart-btn" 
+              (click)="addToCart()" 
+              [disabled]="product.stock === 0 || isAddingToCart"
+              [class.loading]="isAddingToCart">
+        <i class="fas" [ngClass]="isAddingToCart ? 'fa-spinner fa-spin' : 'fa-shopping-cart'"></i>
+        {{ isAddingToCart ? 'جاري الإضافة...' : 'أضف إلى السلة' }}
+      </button>
+    </div>
+
+    <div class="product-meta">
+      <div class="meta-item">
+        <i class="fas fa-box"></i>
+        <span>الرقم التسلسلي: {{ product.id }}</span>
+      </div>
+      <div class="meta-item">
+        <i class="fas fa-calendar"></i>
+        <span>تاريخ الإضافة: {{ product.createdAt | date:'mediumDate' }}</span>
+      </div>
+    </div>
+  </div>
+</div> 
