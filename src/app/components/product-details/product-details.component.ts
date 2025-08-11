@@ -6,6 +6,7 @@ import { Product } from '../../interfaces/product';
 import { CartService } from '../../services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-product-details',
@@ -19,6 +20,7 @@ export class ProductDetailsComponent implements OnInit {
   quantity: number = 1;
   selectedImageIndex: number = 0;
   isAddingToCart: boolean = false;
+  staticFiles:string = environment.staticFiles;
 
   constructor(
     private route: ActivatedRoute,

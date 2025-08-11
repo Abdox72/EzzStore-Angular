@@ -6,6 +6,7 @@ import { Product } from '../../interfaces/product';
 import { scrollAnimation } from '../../utils/animations';
 import { CartService } from '../../services/cart.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-featured-products',
@@ -17,6 +18,8 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class FeaturedProductsComponent implements OnInit {
   products: Product[] = [];
+    staticFiles:string = environment.staticFiles;
+
 
   constructor(
     private productService: ProductService,

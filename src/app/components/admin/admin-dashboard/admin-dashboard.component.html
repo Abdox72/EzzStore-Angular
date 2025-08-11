@@ -57,11 +57,11 @@
         <tbody>
           <tr *ngFor="let order of recentOrders">
             <td>#{{ order.id }}</td>
-            <td>{{ order.user?.name }}</td>
-            <td>{{ order.total | currency:'EGP' }}</td>
+            <td>{{ order.customerName }}</td>
+            <td>{{ order.totalAmount | currency:'KWD' }}</td>
             <td>
-              <span class="status-badge" [class]="getStatusClass(order.status)">
-                {{ getStatusText(order.status) }}
+              <span class="status-badge" [class]="getStatusClass(order.orderStatus)">
+                {{ getStatusText(order.orderStatus) }}
               </span>
             </td>
             <td>{{ order.createdAt | date:'short' }}</td>

@@ -5,7 +5,6 @@ import { ProductService } from '../../../services/product.service';
 import { UserService } from '../../../services/user.service';
 import { OrderService, Order } from '../../../services/order.service';
 import { Product } from '../../../interfaces/product';
-import { User } from '../../../services/user.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -56,9 +55,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  getStatusClass(status: Order['status']): string {
+  getStatusClass(status: string): string {
     switch (status) {
-      case 'completed':
+      case 'delivered':
         return 'completed';
       case 'cancelled':
         return 'cancelled';
@@ -67,9 +66,9 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  getStatusText(status: Order['status']): string {
+  getStatusText(status: string): string {
     switch (status) {
-      case 'completed':
+      case 'delivered':
         return 'مكتمل';
       case 'cancelled':
         return 'ملغي';

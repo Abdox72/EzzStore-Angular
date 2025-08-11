@@ -21,7 +21,7 @@
   <div class="products-grid">
     <div class="product-card" *ngFor="let product of filteredProducts">
       <div class="product-image">
-        <img [src]="product.images?.[0]?.imageUrl" [alt]="product.title">
+        <img [src]="staticFiles+product.images?.[0]?.imageUrl" [alt]="product.title">
       </div>
       <div class="product-info">
         <h3>{{ product.title }}</h3>
@@ -96,7 +96,7 @@
           <label for="images">الصور</label>
           <input type="file" multiple  id="images" accept="image/*" (change)="onImageChange($event)">
           <div class="image-preview" *ngIf="imagePreview">
-            <img [src]="imagePreview" alt="Preview">
+            <img [src]="staticFiles+imagePreview" alt="Preview">
           </div>
         </div>
 

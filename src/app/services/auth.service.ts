@@ -31,6 +31,13 @@ interface VerifyEmailRequest {
   token: string;
 }
 
+interface GoogleLoginRequest {
+  idToken: string;
+  email: string;
+  name: string;
+  photoUrl?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -64,6 +71,17 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, credentials)
+      .pipe(
+        tap(response => {
+          this.setToken(response.token);
+          this.emailVerifiedSubject.next(this.isEmailVerified());
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  googleLogin(googleData: GoogleLoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/google-login`, googleData)
       .pipe(
         tap(response => {
           this.setToken(response.token);
@@ -165,17 +183,67 @@ export class AuthService {
     return this.http.delete<void>(`${this.baseUrl}/users/${id}`);
   }
 
-  private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'حدث خطأ غير متوقع';
-    
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = error.error.message;
-    } else {
-      if (error.error?.message) {
-        errorMessage = error.error.message;
-      }
+  getCurrentUser(): User | null {
+    if (!this.isAuthenticated()) {
+      return null;
     }
-    
+
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const decodedToken = this.jwtHelper.decodeToken(token);
+      return {
+        id: decodedToken.nameid,
+        name: decodedToken.name,
+        email: decodedToken.email,
+        role: decodedToken.role || 'User'
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+  private handleError(error: HttpErrorResponse) {
+  let errorMessage = 'حدث خطأ غير متوقع';
+  let errorMessages: string[] = [];
+
+  const errors = error?.error;
+
+  if (!errors) {
     return throwError(() => new Error(errorMessage));
   }
+
+  // case: { message: "Email already registered." }
+  if (typeof errors === 'object' && typeof errors.message === 'string') {
+    errorMessage = errors.message;
+  }
+
+  // case: array of identity errors
+  else if (Array.isArray(errors)) {
+    errorMessages = errors.map(err => {
+      if (typeof err === 'string') return err;
+      if (typeof err === 'object') return err.description || err.code || 'خطأ غير معروف';
+      return 'خطأ غير معروف';
+    });
+  }
+
+  // case: ASP.NET model validation errors (ValidationProblemDetails)
+  else if (typeof errors === 'object') {
+    for (const key in errors) {
+      if (Array.isArray(errors[key])) {
+        errorMessages.push(...errors[key]);
+      }
+    }
+  }
+
+  if (errorMessages.length > 0) {
+    errorMessage = errorMessages.join(', ');
+  }
+
+  return throwError(() => new Error(errorMessage));
+}
+
+ 
 }

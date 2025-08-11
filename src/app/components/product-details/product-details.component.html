@@ -1,14 +1,14 @@
 <div class="product-details-container" *ngIf="product">
   <div class="product-gallery">
     <div class="main-image">
-      <img [src]="getCurrentImage()" [alt]="product.title">
+      <img [src]="staticFiles+getCurrentImage()" [alt]="product.title">
     </div>
     <div class="thumbnail-list" *ngIf="product.images && product.images.length > 1">
       <div class="thumbnail" 
            *ngFor="let image of product.images; let i = index"
            [class.active]="i === selectedImageIndex"
            (click)="selectImage(i)">
-        <img [src]="image.imageUrl" [alt]="product.title + ' - صورة ' + (i + 1)">
+        <img [src]="staticFiles+image.imageUrl" [alt]="product.title + ' - صورة ' + (i + 1)">
       </div>
     </div>
   </div>

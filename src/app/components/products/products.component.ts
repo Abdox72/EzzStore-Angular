@@ -7,6 +7,7 @@ import { CartService } from '../../services/cart.service';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-products',
@@ -24,6 +25,7 @@ export class ProductsComponent implements OnInit {
   minPrice: number = 0;
   maxPrice: number = 1000;
   priceRange: number = this.maxPrice;
+  staticFiles:string = environment.staticFiles;
 
   constructor(
     private productService: ProductService,

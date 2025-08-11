@@ -58,23 +58,23 @@ export class RegisterComponent {
   }
 
   private handleErrorResponse(error: any) {
-    const backendError = error?.error;
-    if(backendError.message){
-      this.errorMessage=backendError.message;
+    // const backendError = error?.error;
+    if (error) {
+      this.errorMessage = error.message;
     }
-    if (!backendError) {
+    if (!error) {
       this.errorMessage = 'An unknown error occurred.';
       return;
     }
-    if (typeof backendError === 'string') {
-      this.errorMessage = backendError;
-    } else if (Array.isArray(backendError)) {
-      this.errorMessage = backendError.map(e => e.description || e.code).join(', ');
-    } else if (typeof backendError === 'object') {
+    if (typeof error === 'string') {
+      this.errorMessage = error;
+    } else if (Array.isArray(error)) {
+      this.errorMessage = error.map(e => e.description || e.code).join(', ');
+    } else if (typeof error === 'object') {
       const messages: string[] = [];
-      for (const key in backendError) {
-        if (Array.isArray(backendError[key])) {
-          messages.push(...backendError[key]);
+      for (const key in error) {
+        if (Array.isArray(error[key])) {
+          messages.push(...error[key]);
         }
       }
       this.errorMessages =messages;

@@ -13,7 +13,7 @@
   <div class="categories-grid">
     <div class="category-card" *ngFor="let category of filteredCategories">
       <div class="category-image">
-        <img [src]="category.image || '/assets/images/placeholder.jpg'" [alt]="category.name">
+        <img [src]="staticFiles+category.image || '/assets/images/placeholder.jpg'" [alt]="category.name">
       </div>
       <div class="category-info">
         <h3>{{ category.name }}</h3>

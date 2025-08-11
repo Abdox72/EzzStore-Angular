@@ -1,0 +1,217 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>إتمام الطلب</h1>
+    <p class="checkout-summary">لديك {{ totalItems }} منتج في السلة</p>
+  </div>
+
+  <div class="checkout-content" *ngIf="cartItems.length > 0">
+    <div class="checkout-grid">
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2>ملخص الطلب</h2>
+        <div class="cart-items">
+          <div class="cart-item" *ngFor="let item of cartItems">
+            <div class="item-image">
+              <img [src]="staticFiles+item.product.images?.[0]?.imageUrl" [alt]="item.product.title">
+            </div>
+            <div class="item-details">
+              <h4>{{ item.product.title }}</h4>
+              <p class="item-price">{{ item.product.price }} دينار × {{ item.quantity }}</p>
+            </div>
+            <div class="item-total">
+              <p>{{ item.product.price * item.quantity }} دينار</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-totals">
+          <div class="summary-row">
+            <span>عدد المنتجات:</span>
+            <span>{{ totalItems }}</span>
+          </div>
+          <div class="summary-row">
+            <span>تكلفة المنتجات:</span>
+            <span>{{ totalPrice }} دينار</span>
+          </div>
+          <div class="summary-row">
+            <span>تكلفة الشحن:</span>
+            <span>مجاني</span>
+          </div>
+          <div class="summary-row total">
+            <span>المجموع الكلي:</span>
+            <span>{{ totalPrice }} دينار</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Form -->
+      <div class="checkout-form">
+        <h2>معلومات العميل</h2>
+        
+        <form (ngSubmit)="processPayment()" #checkoutForm="ngForm">
+          <div class="form-group">
+            <label for="name">الاسم الكامل *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              [(ngModel)]="customerInfo.name" 
+              required 
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="email">البريد الإلكتروني *</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="customerInfo.email" 
+              required 
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">رقم الهاتف *</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              name="phone" 
+              [(ngModel)]="customerInfo.phone" 
+              required 
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="address">العنوان</label>
+            <input 
+              type="text" 
+              id="address" 
+              name="address" 
+              [(ngModel)]="customerInfo.address" 
+              class="form-control">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">المدينة</label>
+              <input 
+                type="text" 
+                id="city" 
+                name="city" 
+                [(ngModel)]="customerInfo.city" 
+                class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="postalCode">الرمز البريدي</label>
+              <input 
+                type="text" 
+                id="postalCode" 
+                name="postalCode" 
+                [(ngModel)]="customerInfo.postalCode" 
+                class="form-control">
+            </div>
+          </div>
+
+          <!-- Payment Method Selection -->
+          <div class="payment-methods">
+            <h3>طريقة الدفع</h3>
+            
+            <div class="payment-option">
+              <input 
+                type="radio" 
+                id="whatsapp" 
+                name="paymentMethod" 
+                value="whatsapp" 
+                [(ngModel)]="selectedPaymentMethod" 
+                (change)="onPaymentMethodChange()">
+              <label for="whatsapp" class="payment-label">
+                <i class="fab fa-whatsapp"></i>
+                <div class="payment-info">
+                  <span class="payment-title">الدفع عبر واتساب</span>
+                  <span class="payment-description">إرسال الطلب عبر واتساب للمراجعة والتأكيد</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="payment-option">
+              <input 
+                type="radio" 
+                id="stripe" 
+                name="paymentMethod" 
+                value="stripe" 
+                [(ngModel)]="selectedPaymentMethod" 
+                (change)="onPaymentMethodChange()">
+              <label for="stripe" class="payment-label">
+                <i class="fas fa-credit-card"></i>
+                <div class="payment-info">
+                  <span class="payment-title">الدفع الإلكتروني</span>
+                  <span class="payment-description">الدفع المباشر عبر البطاقة الائتمانية</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="payment-option">
+              <input 
+                type="radio" 
+                id="paypal" 
+                name="paymentMethod" 
+                value="paypal" 
+                [(ngModel)]="selectedPaymentMethod" 
+                (change)="onPaymentMethodChange()">
+              <label for="paypal" class="payment-label">
+                <i class="fab fa-paypal"></i>
+                <div class="payment-info">
+                  <span class="payment-title">الدفع عبر PayPal</span>
+                  <span class="payment-description">الدفع الآمن عبر حساب PayPal الخاص بك</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Stripe Card Element -->
+          <div class="stripe-section" *ngIf="selectedPaymentMethod === 'stripe'">
+            <h3>معلومات البطاقة</h3>
+            <div id="card-element" class="card-element"></div>
+            <div id="card-errors" class="card-errors" role="alert"></div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="checkout-actions">
+            <button 
+              type="button" 
+              routerLink="/cart" 
+              class="btn-secondary">
+              <i class="fas fa-arrow-left"></i>
+              العودة إلى السلة
+            </button>
+            
+            <button 
+              type="submit" 
+              [disabled]="!isFormValid() || isLoading" 
+              class="btn-primary">
+              <i class="fas fa-lock"></i>
+              <span *ngIf="!isLoading">
+                {{ selectedPaymentMethod === 'whatsapp' ? 'إرسال الطلب عبر واتساب' : 'إتمام الدفع' }}
+              </span>
+              <span *ngIf="isLoading">جاري المعالجة...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-cart" *ngIf="cartItems.length === 0">
+    <div class="empty-cart-content">
+      <i class="fas fa-shopping-cart"></i>
+      <h2>سلة التسوق فارغة</h2>
+      <p>لم تقم بإضافة أي منتجات إلى سلة التسوق بعد</p>
+      <a routerLink="/products" class="continue-shopping">
+        <i class="fas fa-arrow-left"></i>
+        متابعة التسوق
+      </a>
+    </div>
+  </div>
+</div>

@@ -8,7 +8,7 @@
     <div class="cart-items">
       <div class="cart-item" *ngFor="let item of cartItems">
         <div class="item-image">
-          <img [src]="item.product.images?.[0]?.imageUrl" 
+          <img [src]="staticFiles+item.product.images?.[0]?.imageUrl" 
                 [alt]="item.product.title"
                 >
                 <!-- (error)="handleImageError($event)" -->
@@ -65,7 +65,7 @@
         </button>
         <button class="checkout" (click)="checkout()">
           <i class="fas fa-shopping-cart"></i>
-          إتمام الطلب
+          متابعة الشراء
         </button>
       </div>
     </div>

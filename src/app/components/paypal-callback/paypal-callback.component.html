@@ -1,0 +1,28 @@
+<div class="paypal-callback-container">
+  <div class="callback-content">
+    <div *ngIf="isLoading" class="loading-section">
+      <div class="spinner"></div>
+      <h2>جاري معالجة الدفع...</h2>
+      <p>يرجى الانتظار بينما نتحقق من عملية الدفع الخاصة بك.</p>
+    </div>
+
+    <div *ngIf="!isLoading && isSuccess" class="success-section">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2>تم الدفع بنجاح!</h2>
+      <p>تم استلام طلبك وسيتم معالجته قريبًا.</p>
+      <p>سيتم تحويلك إلى الصفحة الرئيسية تلقائيًا خلال بضع ثوان.</p>
+      <button class="btn-primary" (click)="goToHome()">العودة إلى الصفحة الرئيسية</button>
+    </div>
+
+    <div *ngIf="!isLoading && !isSuccess" class="error-section">
+      <div class="error-icon">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <h2>فشلت عملية الدفع</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-primary" (click)="goToHome()">العودة إلى الصفحة الرئيسية</button>
+    </div>
+  </div>
+</div>

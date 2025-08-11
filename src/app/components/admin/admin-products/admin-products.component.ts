@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ProductService } from '../../../services/product.service';
 import { Product, Category } from '../../../interfaces/product';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-products',
@@ -24,6 +25,7 @@ export class AdminProductsComponent implements OnInit {
   isModalOpen = false;
   productForm: FormGroup;
   imagePreview: string | null = null;
+  staticFiles:string = environment.staticFiles;
 
   constructor(
     private productService: ProductService,

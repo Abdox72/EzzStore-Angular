@@ -18,7 +18,7 @@ export class AdminLayoutComponent implements OnInit {
     { path: '/admin/categories', label: 'التصنيفات', icon: 'category' },
     { path: '/admin/users', label: 'المستخدمين', icon: 'people' },
     { path: '/admin/contact-messages', label: 'المراسلات', icon: 'contacts' },
-    // { path: '/admin/settings', label: 'الإعدادات', icon: 'settings' }
+    { path: '/admin/orders', label: 'الطلبات', icon: 'shopping_cart' },
   ];
 
   currentRoute = '';

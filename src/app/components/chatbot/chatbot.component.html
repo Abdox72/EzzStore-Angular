@@ -1,0 +1,90 @@
+<!-- Chatbot Toggle Button -->
+<div class="chatbot-toggle" [class.open]="isChatOpen" (click)="toggleChat()">
+  <i class="fas fa-comments" *ngIf="!isChatOpen"></i>
+  <i class="fas fa-times" *ngIf="isChatOpen"></i>
+  <span class="chat-notification" *ngIf="!isChatOpen && messages.length > 1"></span>
+</div>
+
+<!-- نافذة عرض الصور المنبثقة -->
+<div class="image-modal" [class.open]="isImageModalOpen" (click)="closeImageModal()">
+  <div class="modal-close" (click)="closeImageModal()">
+    <i class="fas fa-times"></i>
+  </div>
+  <img [src]="currentImageUrl" alt="صورة" class="modal-image" *ngIf="currentImageUrl">
+</div>
+
+<!-- Chatbot Window -->
+<div class="chatbot-window" [class.open]="isChatOpen">
+  <!-- Header -->
+  <div class="chatbot-header">
+    <div class="header-content">
+      <div class="bot-avatar">
+        <i class="fas fa-robot"></i>
+      </div>
+      <div class="header-text">
+        <h4>مساعد إز ستور</h4>
+        <span class="status">متصل الآن</span>
+      </div>
+    </div>
+    <button class="clear-btn" (click)="clearChat()" title="مسح المحادثة">
+      <i class="fas fa-trash"></i>
+    </button>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container" #messagesContainer>
+    <div class="message" 
+         *ngFor="let message of messages" 
+         [class.user-message]="message.isUser"
+         [class.bot-message]="!message.isUser">
+      <div class="message-content">
+        <div class="message-bubble">
+          <!-- إذا كانت الرسالة تحتوي على صورة -->
+          <div *ngIf="message.metadata?.imageUrl" class="message-image-container">
+            <img [src]="message.metadata?.imageUrl" alt="صورة" class="message-image" (click)="openImageModal(message.metadata?.imageUrl)">
+          </div>
+          <p [innerHTML]="message.content | linkify" class="message-text"></p>
+          <span class="timestamp">{{ message.timestamp | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading indicator -->
+    <div class="message bot-message" *ngIf="isLoading">
+      <div class="message-content">
+        <div class="message-bubble loading">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Suggestions -->
+    <div class="suggestions-container" *ngIf="messages.length <= 2 && !currentMessage"> <!-- يظهر في البداية وبعد الرسالة الأولى -->
+      <button *ngFor="let suggestion of suggestions" (click)="insertSuggestion(suggestion)" class="suggestion-btn">
+        <i class="fas fa-lightbulb suggestion-icon"></i>
+        {{ suggestion }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-container">
+      <textarea 
+        [(ngModel)]="currentMessage" 
+        (keypress)="onKeyPress($event)"
+        placeholder="اكتب رسالتك هنا..."
+        rows="1"
+        [disabled]="isLoading"></textarea>
+      <button 
+        (click)="sendMessage()" 
+        [disabled]="!currentMessage.trim() || isLoading"
+        class="send-btn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>

@@ -43,7 +43,7 @@ export class ContactMessagesComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading messages:', error);
-        this.error = 'حدث خطأ أثناء تحميل الرسائل';
+        this.error = 'لا يوجد اي رسائل';
         this.isLoading = false;
       }
     });

@@ -1,0 +1,104 @@
+<div class="order-tracking">
+  <div class="tracking-header">
+    <h3>تتبع الطلب #{{ order.id }}</h3>
+    <div class="tracking-info" *ngIf="order.trackingNumber">
+      <div class="tracking-number">
+        <span class="label">رقم التتبع:</span>
+        <span class="value">{{ order.trackingNumber }}</span>
+      </div>
+      <div class="carrier" *ngIf="order.carrier">
+        <span class="label">شركة الشحن:</span>
+        <span class="value">{{ order.carrier }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tracking-timeline">
+    <div class="timeline-step" *ngFor="let step of trackingSteps; let i = index" [ngClass]="getStepClass(step)">
+      <div class="step-icon" [ngClass]="getIconClass(step)">
+        <span class="material-icons">{{ step.icon }}</span>
+      </div>
+      <div class="step-content">
+        <h4 class="step-title">{{ step.title }}</h4>
+        <p class="step-description">{{ step.description }}</p>
+        <div class="step-date" *ngIf="step.completed && getStepDate(step.status)">
+          {{ formatDate(getStepDate(step.status)!) }}
+        </div>
+      </div>
+      <div class="step-connector" *ngIf="i < trackingSteps.length - 1"></div>
+    </div>
+  </div>
+
+  <div class="tracking-map-container" *ngIf="order.orderStatus === 'shipped'">
+    <div class="map-header">
+      <h4>خريطة التتبع</h4>
+      <div class="estimated-delivery">
+        <span class="material-icons">schedule</span>
+        <span>وقت التوصيل المتوقع: {{ getEstimatedDeliveryDate() }}</span>
+      </div>
+    </div>
+    
+    <div class="map-loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>جاري تحميل معلومات التتبع...</p>
+    </div>
+    
+    <div class="map-error" *ngIf="error">
+      <span class="material-icons">error</span>
+      <p>{{ error }}</p>
+    </div>
+    
+    <div class="map-wrapper" *ngIf="!loading && !error">
+      <div #mapContainer class="map-container"></div>
+      
+      <div class="map-info" *ngIf="trackingInfo">
+        <div class="current-location">
+          <span class="material-icons">location_on</span>
+          <div>
+            <h5>الموقع الحالي</h5>
+            <p>{{ trackingInfo.currentLocation.description }}</p>
+          </div>
+        </div>
+        
+        <div class="shipping-route">
+          <span class="material-icons">timeline</span>
+          <div>
+            <h5>مسار الشحن</h5>
+            <div class="route-stops">
+              <div class="route-stop" *ngFor="let location of trackingInfo.route">
+                <span class="stop-dot" [ngClass]="{'active': location.status === 'current'}"></span>
+                <div class="stop-info">
+                  <p class="stop-name">{{ location.description }}</p>
+                  <p class="stop-date">{{ formatDate(location.timestamp) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tracking-actions">
+    <button class="btn-refresh" (click)="refreshTracking()">
+      <span class="material-icons">refresh</span>
+      تحديث التتبع
+    </button>
+    <button class="btn-track" (click)="trackProduct()">
+      <span class="material-icons">location_searching</span>
+      تتبع المنتج
+    </button>
+    <button class="btn-cancel" (click)="cancelOrder()" *ngIf="canCancelOrder()">
+      <span class="material-icons">cancel</span>
+      إلغاء الطلب
+    </button>
+    <button class="btn-refund" (click)="requestRefund()" *ngIf="canRequestRefund()">
+      <span class="material-icons">money_off</span>
+      استرداد المبلغ
+    </button>
+    <button class="btn-contact" (click)="contactSupport()">
+      <span class="material-icons">support_agent</span>
+      الاتصال بالدعم
+    </button>
+  </div>
+</div>

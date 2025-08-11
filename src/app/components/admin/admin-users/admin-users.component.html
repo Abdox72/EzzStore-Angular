@@ -3,6 +3,14 @@
     <h1>إدارة المستخدمين</h1>
     <button class="add-button" (click)="openModal()">إضافة مستخدم جديد</button>
   </div>
+  
+  <!-- رسائل النجاح والخطأ -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
 
   <div class="filters">
     <div class="search-box">
@@ -13,15 +21,15 @@
   <div class="users-grid">
     <div class="user-card" *ngFor="let user of filteredUsers">
       <div class="user-info">
-        <h3>{{ user.name }}</h3>
+        <h3>{{ user.name || user.username }}</h3>
         <p class="email">{{ user.email }}</p>
-        <span class="role-badge" [class.admin]="user.role === 'admin'">
+        <span class="role-badge" [class.admin]="user.role.toLowerCase() === 'admin'">
           {{ user.role.toLowerCase() === 'admin' ? 'مدير' : 'مستخدم' }}
         </span>
       </div>
       <div class="user-actions">
-        <button class="edit" (click)="editUser(user)">تعديل</button>
-        <button class="delete" (click)="deleteUser(user.id)">حذف</button>
+        <button class="edit" (click)="editUser(user)" title="تعديل دور المستخدم">تعديل الدور</button>
+        <button class="delete" (click)="deleteUser(user.id.toString())" title="حذف المستخدم">حذف</button>
       </div>
     </div>
   </div>
@@ -29,26 +37,46 @@
   <div class="form-modal" *ngIf="isModalOpen">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>{{ selectedUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد' }}</h2>
+        <h2>{{ selectedUser ? 'تعديل دور المستخدم' : 'إضافة مستخدم جديد' }}</h2>
         <button class="close-button" (click)="closeModal()">×</button>
       </div>
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="name">الاسم</label>
-          <input type="text" id="name" formControlName="name">
-          <div class="error-message" *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched">
-            الاسم مطلوب ويجب أن يكون 3 أحرف على الأقل
+        <!-- حقول النموذج للمستخدم الجديد -->
+        <ng-container *ngIf="!selectedUser">
+          <div class="form-group">
+            <label for="name">الاسم</label>
+            <input type="text" id="name" formControlName="name">
+            <div class="error-message" *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched">
+              الاسم مطلوب ويجب أن يكون 3 أحرف على الأقل
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="email">البريد الإلكتروني</label>
-          <input type="email" id="email" formControlName="email">
-          <div class="error-message" *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
-            البريد الإلكتروني غير صالح
+          <div class="form-group">
+            <label for="email">البريد الإلكتروني</label>
+            <input type="email" id="email" formControlName="email">
+            <div class="error-message" *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+              البريد الإلكتروني غير صالح
+            </div>
           </div>
-        </div>
 
+          <div class="form-group">
+            <label for="password">كلمة السر</label>
+            <input type="password" id="password" formControlName="password">
+            <div class="error-message" *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched">
+              كلمة السر مطلوبة ويجب أن تكون 8 أحرف على الأقل
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- عرض معلومات المستخدم عند التعديل -->
+        <ng-container *ngIf="selectedUser">
+          <div class="user-info-display">
+            <p><strong>الاسم:</strong> {{ selectedUser.name || selectedUser.username }}</p>
+            <p><strong>البريد الإلكتروني:</strong> {{ selectedUser.email }}</p>
+          </div>
+        </ng-container>
+
+        <!-- حقل الدور (مشترك بين الإضافة والتعديل) -->
         <div class="form-group">
           <label for="role">الدور</label>
           <select id="role" formControlName="role">
@@ -57,14 +85,6 @@
           </select>
           <div class="error-message" *ngIf="userForm.get('role')?.invalid && userForm.get('role')?.touched">
             الدور مطلوب
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="password">كلمة السر</label>
-          <input type="password" id="password" formControlName="password">
-          <div class="error-message" *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched">
-            كلمة السر غير صالحه
           </div>
         </div>
 

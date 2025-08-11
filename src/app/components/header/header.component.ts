@@ -31,6 +31,22 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
       this.authService.authStatus$.subscribe(status => {
         this.isAuthenticated = status;
+        if(status){
+          this.navLinks =[
+                { path: '/home', label: 'الرئيسية' , exact : true },
+                { path: '/products', label: 'المنتجات' , exact : false },
+                { path: '/orders', label: 'طلباتي' , exact : false },
+                { path: '/about', label: 'عن المتجر' , exact : true },
+                { path: '/contact', label: 'اتصل بنا' , exact : true }
+              ]
+        } else {
+          this.navLinks =[
+                { path: '/home', label: 'الرئيسية' , exact : true },
+                { path: '/products', label: 'المنتجات' ,exact : false },
+                { path: '/about', label: 'عن المتجر' , exact : true },
+                { path: '/contact', label: 'اتصل بنا' , exact : true}
+              ]
+        }
       });
       this.authService.adminStatus$.subscribe(isAdmin => {
         this.isAdmin = isAdmin;
@@ -39,6 +55,7 @@ export class HeaderComponent implements OnInit {
                 { path: '/home', label: 'الرئيسية' , exact : true },
                 { path: '/admin', label: 'الإدارة' , exact : false },
                 { path: '/products', label: 'المنتجات' , exact : true },
+                { path: '/orders', label: 'طلباتي' , exact : false },
                 { path: '/about', label: 'عن المتجر' , exact : true }
               ]
         }

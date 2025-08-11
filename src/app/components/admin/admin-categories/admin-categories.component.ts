@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../services/product.service';
 import { Category } from '../../../interfaces/product';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-categories',
@@ -21,6 +22,7 @@ export class AdminCategoriesComponent implements OnInit {
   selectedFile: File | null = null;
 
   imagePreview: string | null = null;
+  staticFiles:string = environment.staticFiles;
 
 
   constructor(

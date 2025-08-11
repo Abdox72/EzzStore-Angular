@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { User } from '../interfaces/user';
 
-export interface User {
-  id: number;
-  name: string;
+export interface AddUserDto {
+  name?: string;
   email: string;
-  role: 'admin' | 'user';
-  createdAt: string;
+  role?: string;
+  password: string;
 }
 
 @Injectable({
@@ -23,19 +23,23 @@ export class UserService {
     return this.http.get<User[]>(this.apiUrl);
   }
 
-  getUser(id: number): Observable<User> {
+  getUser(id: string): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
-  createUser(user: Partial<User>): Observable<User> {
-    return this.http.post<User>(this.apiUrl, user);
+  createUser(user: AddUserDto): Observable<any> {
+    return this.http.post<any>(this.apiUrl, user);
   }
 
-  updateUser(id: number, user: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/${id}`, user);
+  updateUserRole(id: string, role: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/role`, JSON.stringify(role), {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   }
 
-  deleteUser(id: number): Observable<void> {
+  deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-} 
+}

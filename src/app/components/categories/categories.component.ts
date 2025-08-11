@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Category } from '../../interfaces/product';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-categories',
@@ -13,6 +14,8 @@ import { Category } from '../../interfaces/product';
 })
 export class CategoriesComponent implements OnInit {
   categories: Category[] = [];
+  staticFiles:string = environment.staticFiles;
+
 
   constructor(private productService: ProductService) {}
 

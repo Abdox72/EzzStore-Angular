@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { ChatbotComponent } from "./components/chatbot/chatbot.component";
 
 @Component({
   selector: 'app-root',
@@ -11,10 +12,12 @@ import { FooterComponent } from './components/footer/footer.component';
     CommonModule,
     RouterOutlet,
     HeaderComponent,
-    FooterComponent
-  ],
+    FooterComponent,
+    ChatbotComponent
+],
   template: `
     <app-header></app-header>
+    <app-chatbot></app-chatbot>
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
@@ -22,7 +25,6 @@ import { FooterComponent } from './components/footer/footer.component';
   `,
   styles: [`
     .main-content {
-      // padding-top: 80px; /* Adjust this value based on your header height */
       min-height: calc(100vh - 160px); /* Adjust based on header and footer height */
     }
   `]

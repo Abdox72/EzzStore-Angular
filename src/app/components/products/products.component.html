@@ -47,7 +47,7 @@
       <div class="products-grid">
         <div class="product-card" *ngFor="let product of filteredProducts">
           <div class="product-image">
-            <img [src]="product.images?.[0]?.imageUrl || '/assets/images/placeholder.jpg'" [alt]="product.title">
+            <img [src]="staticFiles+product.images?.[0]?.imageUrl || '/assets/images/placeholder.jpg'" [alt]="product.title">
           </div>
           <div class="product-info">
             <h3>{{ product.title }}</h3>

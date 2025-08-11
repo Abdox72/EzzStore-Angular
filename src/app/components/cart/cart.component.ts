@@ -6,6 +6,8 @@ import { CartService, CartItem } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-cart',
@@ -19,10 +21,13 @@ export class CartComponent implements OnInit, OnDestroy {
   totalItems = 0;
   totalPrice = 0;
   private subscriptions: Subscription[] = [];
+  staticFiles:string = environment.staticFiles;
+
 
   constructor(
     private cartService: CartService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -58,39 +63,13 @@ export class CartComponent implements OnInit, OnDestroy {
     this.toastr.success('تم مسح السلة بنجاح', 'تم المسح');
   }
 
-  // handleImageError(event: Event) {
-  //   const imgElement = event.target as HTMLImageElement;
-  //   imgElement.src = '/assets/images/placeholder.jpg';
-  // }
-
   checkout() {
-    // Prepare WhatsApp message
-    const message = this.prepareWhatsAppMessage();
+    if (this.cartItems.length === 0) {
+      this.toastr.warning('السلة فارغة، يرجى إضافة منتجات أولاً', 'تنبيه');
+      return;
+    }
     
-    // Encode the message for URL
-    const encodedMessage = encodeURIComponent(message);
-    
-    // WhatsApp business number - replace with your actual number
-    const whatsappNumber = '+201157895731';
-    
-    // Create WhatsApp URL
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    
-    // Show success message
-    this.toastr.success('سيتم تحويلك إلى واتساب لإتمام الطلب', 'جاري التحويل');
-    
-    // Redirect to WhatsApp
-    window.open(whatsappUrl, '_blank');
-    
-    // Clear the cart after redirecting
-    this.clearCart();
-  }
-
-  private prepareWhatsAppMessage(): string {
-    const orderItems = this.cartItems.map(item => 
-      `- ${item.product.title} (${item.quantity} × ${item.product.price} دينار)`
-    ).join('\n');
-
-    return `مرحباً، أود تقديم طلب جديد:\n\n${orderItems}\n\nالمجموع الكلي: ${this.totalPrice} دينار`;
+    // Redirect to checkout page
+    this.router.navigate(['/checkout']);
   }
 } 

@@ -52,6 +52,9 @@
       <li>
         <a (click)="toggleSidebar()" [routerLink]="'/cart'" class="sidebar-link">العربة</a>
       </li>
+      <li *ngIf="isAuthenticated">
+        <a (click)="toggleSidebar()" [routerLink]="'/orders'" class="sidebar-link">طلباتي</a>
+      </li>
       <li>
         <a
           *ngIf="!isAuthenticated"

@@ -1,0 +1,379 @@
+<div class="user-orders-container">
+  <div class="orders-header">
+    <h1>طلباتي <span class="subtitle">تتبع وإدارة طلباتك بسهولة</span></h1>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>جاري التحميل...</p>
+  </div>
+
+  <div class="orders-container" *ngIf="!loading">
+    <!-- Filters -->
+    <div class="orders-filter" *ngIf="orders.length > 0">
+      <div class="filter-group">
+        <label for="status-filter">تصفية حسب:</label>
+        <select id="status-filter" [(ngModel)]="currentStatusFilter" (ngModelChange)="filterByStatus()">
+          <option value="all">جميع الطلبات</option>
+          <option value="pending">قيد الانتظار</option>
+          <option value="processing">قيد المعالجة</option>
+          <option value="shipped">تم الشحن</option>
+          <option value="delivered">تم التوصيل</option>
+          <option value="cancelled">ملغي</option>
+          <option value="refunded">مسترد</option>
+        </select>
+      </div>
+      <div class="search-box">
+        <span class="material-icons">search</span>
+        <input 
+          type="text" 
+          placeholder="ابحث عن طلب..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="searchSubject.next($event)"
+        >
+      </div>
+    </div>
+    <div class="empty-orders" *ngIf="filteredOrders.length === 0 && !loading && !error">
+      <div class="empty-state">
+        <span class="material-icons">shopping_cart</span>
+        <h3>لا توجد طلبات</h3>
+        <p>لم تقم بأي طلبات بعد</p>
+        <a routerLink="/products" class="btn-primary">تصفح المنتجات</a>
+      </div>
+    </div>
+
+    <div class="orders-list" *ngIf="filteredOrders.length > 0 && !loading && !error">
+      <div class="order-card" *ngFor="let order of filteredOrders" (click)="selectOrder(order)">
+        <div class="order-header">
+          <div class="order-info">
+            <h3 class="order-title">طلب #{{ order.id }}</h3>
+            <span class="order-date">
+              <span class="material-icons">event</span>
+              {{ formatDate(order.createdAt) }}
+            </span>
+          </div>
+          <div class="order-status">
+            <span class="status-badge" [ngClass]="getStatusClass(order.orderStatus)">
+              <span class="material-icons">{{ getStatusIcon(order.orderStatus) }}</span>
+              {{ getStatusText(order.orderStatus) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="order-summary">
+          <div class="order-items">
+            <span>
+              <span class="material-icons">shopping_cart</span>
+              {{ getTotalItems(order) }} منتج
+            </span>
+            <span class="total-amount">{{ order.totalAmount | currency:'KWD' }}</span>
+          </div>
+          <div class="payment-info">
+            <span class="payment-method">
+              <span class="material-icons">credit_card</span>
+              {{ getPaymentMethodText(order.paymentMethod) }}
+            </span>
+            <span class="payment-status" [ngClass]="order.paymentStatus === 'paid' ? 'paid' : 'pending'">
+              <span class="material-icons">{{ order.paymentStatus === 'paid' ? 'done' : 'schedule' }}</span>
+              {{ order.paymentStatus === 'paid' ? 'مدفوع' : 'في الانتظار' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="order-actions">
+          <button class="btn-action view" (click)="selectOrder(order); $event.stopPropagation()" title="عرض التفاصيل">
+            <span class="material-icons">visibility</span>
+            <span>عرض</span>
+          </button>
+          <button class="btn-action cancel" *ngIf="canCancel(order)" (click)="showCancelOrderForm(order); $event.stopPropagation()" title="إلغاء الطلب">
+            <span class="material-icons">cancel</span>
+            <span>إلغاء</span>
+          </button>
+          <!-- تم إزالة زر الاسترداد لأنه مسموح فقط للأدمن -->
+          <button class="btn-action track" *ngIf="canTrack(order)" (click)="showTrackingView(order); $event.stopPropagation()" title="تتبع الشحنة">
+            <span class="material-icons">local_shipping</span>
+            <span>تتبع</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay for sidebar -->
+  <div class="sidebar-overlay" *ngIf="selectedOrder" (click)="closeOrderDetails()"></div>
+  
+  <!-- Order Details -->
+  <div class="order-details" *ngIf="selectedOrder">
+    <div class="sidebar-header">
+      <h3>
+        <span class="material-icons">receipt_long</span>
+        تفاصيل الطلب #{{ selectedOrder.id }}
+      </h3>
+      <button class="btn-close" (click)="closeOrderDetails()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="order-info">
+      <div class="info-section">
+        <h4>
+          <span class="material-icons">person</span>
+          معلومات العميل
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">badge</span>
+              الاسم:
+            </span>
+            <span class="value">{{ selectedOrder.customerName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">email</span>
+              البريد الإلكتروني:
+            </span>
+            <span class="value">{{ selectedOrder.customerEmail }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">phone</span>
+              الهاتف:
+            </span>
+            <span class="value">{{ selectedOrder.customerPhone }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.customerAddress">
+            <span class="label">
+              <span class="material-icons">location_on</span>
+              العنوان:
+            </span>
+            <span class="value">{{ selectedOrder.customerAddress }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h4>
+          <span class="material-icons">info</span>
+          تفاصيل الطلب
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">flag</span>
+              الحالة:
+            </span>
+            <span class="value status-badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
+              <span class="material-icons">{{ getStatusIcon(selectedOrder.orderStatus) }}</span>
+              {{ getStatusText(selectedOrder.orderStatus) }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">payments</span>
+              طريقة الدفع:
+            </span>
+            <span class="value">{{ getPaymentMethodText(selectedOrder.paymentMethod) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">account_balance_wallet</span>
+              حالة الدفع:
+            </span>
+            <span class="value payment-status" [ngClass]="selectedOrder.paymentStatus === 'paid' ? 'paid' : 'pending'">
+              <span class="material-icons">{{ selectedOrder.paymentStatus === 'paid' ? 'done' : 'schedule' }}</span>
+              {{ selectedOrder.paymentStatus === 'paid' ? 'مدفوع' : 'في الانتظار' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">event</span>
+              تاريخ الطلب:
+            </span>
+            <span class="value">{{ formatDate(selectedOrder.createdAt) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.updatedAt">
+            <span class="label">
+              <span class="material-icons">update</span>
+              آخر تحديث:
+            </span>
+            <span class="value">{{ formatDate(selectedOrder.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking Information -->
+      <div class="info-section" *ngIf="selectedOrder.trackingNumber">
+        <h4>
+          <span class="material-icons">local_shipping</span>
+          معلومات التتبع
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">qr_code</span>
+              رقم التتبع:
+            </span>
+            <span class="value">{{ selectedOrder.trackingNumber }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.carrier">
+            <span class="label">
+              <span class="material-icons">business</span>
+              شركة الشحن:
+            </span>
+            <span class="value">{{ selectedOrder.carrier }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.shippedAt">
+            <span class="label">
+              <span class="material-icons">send</span>
+              تاريخ الشحن:
+            </span>
+            <span class="value">{{ formatDate(selectedOrder.shippedAt) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.deliveredAt">
+            <span class="label">
+              <span class="material-icons">inventory</span>
+              تاريخ التوصيل:
+            </span>
+            <span class="value">{{ formatDate(selectedOrder.deliveredAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cancellation Information -->
+      <div class="info-section" *ngIf="selectedOrder.isCancelled">
+        <h4>
+          <span class="material-icons">cancel</span>
+          معلومات الإلغاء
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">event_busy</span>
+              تاريخ الإلغاء:
+            </span>
+            <span class="value">{{ formatDate(selectedOrder.cancelledAt!) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.cancellationReason">
+            <span class="label">
+              <span class="material-icons">report</span>
+              سبب الإلغاء:
+            </span>
+            <span class="value">{{ selectedOrder.cancellationReason }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Refund Information -->
+      <div class="info-section" *ngIf="selectedOrder.isRefunded">
+        <h4>
+          <span class="material-icons">currency_exchange</span>
+          معلومات الاسترداد
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">
+              <span class="material-icons">event_available</span>
+              تاريخ الاسترداد:
+            </span>
+            <span class="value">{{ formatDate(selectedOrder.refundedAt!) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.refundReason">
+            <span class="label">
+              <span class="material-icons">comment</span>
+              سبب الاسترداد:
+            </span>
+            <span class="value">{{ selectedOrder.refundReason }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div class="info-section">
+        <h4>
+          <span class="material-icons">shopping_bag</span>
+          المنتجات
+        </h4>
+        <div class="products-list">
+          <div class="product-item" *ngFor="let item of selectedOrder.orderItems">
+            <div class="product-info">
+              <span class="product-name">
+                <span class="material-icons">inventory_2</span>
+                {{ item.productName }}
+              </span>
+              <span class="product-quantity">{{ item.quantity }}</span>
+            </div>
+            <div class="product-price">
+              <span class="unit-price">سعر الوحدة: {{ item.unitPrice | currency:'KWD' }}</span>
+              <span class="total-price">{{ item.totalPrice | currency:'KWD' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="order-total">
+          <span class="total-label">
+            <span class="material-icons">calculate</span>
+            المجموع:
+          </span>
+          <span class="total-amount">{{ selectedOrder.totalAmount | currency:'KWD' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Tracking Component -->
+    <div class="tracking-section" *ngIf="showTracking && canTrack(selectedOrder)">
+      <h4 class="tracking-title">
+        <span class="material-icons">timeline</span>
+        تتبع الطلب
+      </h4>
+      <app-order-tracking [order]="selectedOrder"></app-order-tracking>
+    </div>
+
+    <!-- نموذج الاسترداد تمت إزالته لأنه مسموح فقط للأدمن -->
+
+    <!-- Cancel Order Form -->
+    <div class="cancel-form-section" *ngIf="showCancelForm && canCancel(selectedOrder)">
+      <h4>
+        <span class="material-icons">cancel_schedule_send</span>
+        إلغاء الطلب
+      </h4>
+      <form [formGroup]="cancelForm" (ngSubmit)="cancelOrder()">
+        <div class="form-group">
+          <label for="reason">
+            <span class="material-icons">edit_note</span>
+            سبب الإلغاء *
+          </label>
+          <textarea 
+            id="reason" 
+            formControlName="reason" 
+            placeholder="يرجى كتابة سبب إلغاء الطلب (10 أحرف على الأقل)"
+            rows="3">
+          </textarea>
+          <div class="error-message" *ngIf="cancelForm.get('reason')?.invalid && cancelForm.get('reason')?.touched">
+            <span *ngIf="cancelForm.get('reason')?.errors?.['required']">
+              <span class="material-icons">error</span>
+              سبب الإلغاء مطلوب
+            </span>
+            <span *ngIf="cancelForm.get('reason')?.errors?.['minlength']">
+              <span class="material-icons">error</span>
+              يجب أن يكون السبب 10 أحرف على الأقل
+            </span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="showCancelForm = false">
+            <span class="material-icons">close</span>
+            إلغاء
+          </button>
+          <button type="submit" class="btn-danger" [disabled]="cancelForm.invalid">
+            <span class="material-icons">check_circle</span>
+            تأكيد الإلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

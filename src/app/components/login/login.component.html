@@ -55,6 +55,20 @@
         <span *ngIf="isLoading">جاري تسجيل الدخول...</span>
       </button>
 
+      <div class="divider">
+        <span>أو</span>
+      </div>
+
+      <button 
+        type="button" 
+        class="google-login-button"
+        (click)="onGoogleLogin()"
+        [disabled]="isLoading"
+      >
+        <mat-icon>login</mat-icon>
+        <span>تسجيل الدخول بـ Google</span>
+      </button>
+
       <div class="form-links">
         <a routerLink="/register">إنشاء حساب جديد</a>
         <a routerLink="/reset-password">نسيت كلمة المرور؟</a>

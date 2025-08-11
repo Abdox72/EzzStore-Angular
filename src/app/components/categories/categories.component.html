@@ -4,7 +4,7 @@
     <div class="categories-grid">
       <div class="category-card" *ngFor="let category of categories">
         <div class="category-image">
-          <img [src]="category.image" [alt]="category.name">
+          <img [src]="staticFiles+category.image" [alt]="category.name">
           <div class="category-overlay">
             <div class="category-stats">
               <div class="stat">
