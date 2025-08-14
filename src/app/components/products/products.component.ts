@@ -27,6 +27,18 @@ export class ProductsComponent implements OnInit {
   priceRange: number = this.maxPrice;
   staticFiles:string = environment.staticFiles;
 
+  // Pagination properties
+  currentPage = 1;
+  pageSize = 12;
+  totalItems = 0;
+  totalPages = 0;
+  hasNextPage = false;
+  hasPreviousPage = false;
+  paginatedProducts: Product[] = [];
+
+  // Make Math available in template
+  Math = Math;
+
   constructor(
     private productService: ProductService,
     private cartService: CartService,
@@ -51,6 +63,7 @@ export class ProductsComponent implements OnInit {
       this.maxPrice = Math.max(...data.map(p => p.price));
       this.priceRange = this.maxPrice;
       this.filterProducts();
+      this.updatePagination();
     });
   }
 
@@ -75,6 +88,11 @@ export class ProductsComponent implements OnInit {
       const matchesPrice = product.price <= this.priceRange;
       return matchesCategory && matchesSearch && matchesPrice;
     });
+    
+    // Reset to first page when filtering
+    this.currentPage = 1;
+    this.updatePagination();
+    
     if (this.filteredProducts.length === 0) {
       this.toastr.info('لم يتم العثور على منتجات تطابق معايير البحث', 'نتيجة البحث');
     }
@@ -87,5 +105,41 @@ export class ProductsComponent implements OnInit {
 
   getProductImage(product: Product): string {
     return product.images?.[0]?.imageUrl || '/assets/images/placeholder.jpg';
+  }
+
+  // Pagination methods
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.pageSize = parseInt(target.value);
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    this.totalItems = this.filteredProducts.length;
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.hasPreviousPage = this.currentPage > 1;
+    this.hasNextPage = this.currentPage < this.totalPages;
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedProducts = this.filteredProducts.slice(startIndex, endIndex);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
   }
 }

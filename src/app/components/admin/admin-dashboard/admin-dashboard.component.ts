@@ -1,58 +1,101 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { ProductService } from '../../../services/product.service';
 import { UserService } from '../../../services/user.service';
 import { OrderService, Order } from '../../../services/order.service';
+import { DashboardService } from '../../../services/dashboard.service';
 import { Product } from '../../../interfaces/product';
+import { DashboardStatistics, DateRange } from '../../../interfaces/dashboard';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
-  totalProducts = 0;
-  totalCategories = 0;
-  totalUsers = 0;
-  totalOrders = 0;
-  recentOrders: Order[] = [];
+  dashboardData: DashboardStatistics | null = null;
+  loading = false;
+  error = '';
+  
+  // Date range filter
+  dateRangeForm: FormGroup;
+  selectedDateRange: DateRange | null = null;
+  staticFiles:string = environment.staticFiles;
 
   constructor(
     private productService: ProductService,
     private userService: UserService,
-    private orderService: OrderService
-  ) {}
+    private orderService: OrderService,
+    private dashboardService: DashboardService,
+    private fb: FormBuilder
+  ) {
+    this.dateRangeForm = this.fb.group({
+      startDate: [''],
+      endDate: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.loadDashboardData();
   }
 
   loadDashboardData(): void {
-    // Load products count
-    this.productService.getProducts().subscribe(products => {
-      this.totalProducts = products.length;
-    });
+    this.loading = true;
+    this.error = '';
 
-    // Load categories count
-    this.productService.getCategories().subscribe(categories => {
-      this.totalCategories = categories.length;
+    this.dashboardService.getDashboardStatistics().subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'فشل في تحميل بيانات لوحة التحكم';
+        this.loading = false;
+        console.error('Error loading dashboard data:', err);
+      }
     });
+  }
 
-    // Load users count
-    this.userService.getUsers().subscribe(users => {
-      this.totalUsers = users.length;
-    });
+  onDateRangeSubmit(): void {
+    if (this.dateRangeForm.valid) {
+      const formValue = this.dateRangeForm.value;
+      this.selectedDateRange = {
+        startDate: new Date(formValue.startDate),
+        endDate: new Date(formValue.endDate)
+      };
 
-    // Load orders count and recent orders
-    this.orderService.getOrders().subscribe(orders => {
-      this.totalOrders = orders.length;
-      this.recentOrders = orders
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 5);
+      this.loadDashboardDataByDateRange();
+    }
+  }
+
+  loadDashboardDataByDateRange(): void {
+    if (!this.selectedDateRange) return;
+
+    this.loading = true;
+    this.error = '';
+
+    this.dashboardService.getDashboardStatisticsByDateRange(this.selectedDateRange).subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'فشل في تحميل بيانات لوحة التحكم';
+        this.loading = false;
+        console.error('Error loading dashboard data by date range:', err);
+      }
     });
+  }
+
+  resetDateRange(): void {
+    this.dateRangeForm.reset();
+    this.selectedDateRange = null;
+    this.loadDashboardData();
   }
 
   getStatusClass(status: string): string {
@@ -61,6 +104,10 @@ export class AdminDashboardComponent implements OnInit {
         return 'completed';
       case 'cancelled':
         return 'cancelled';
+      case 'shipped':
+        return 'shipped';
+      case 'confirmed':
+        return 'confirmed';
       default:
         return 'pending';
     }
@@ -72,8 +119,31 @@ export class AdminDashboardComponent implements OnInit {
         return 'مكتمل';
       case 'cancelled':
         return 'ملغي';
+      case 'shipped':
+        return 'تم الشحن';
+      case 'confirmed':
+        return 'مؤكد';
       default:
         return 'قيد الانتظار';
     }
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('ar-kw', {
+      style: 'currency',
+      currency: 'KWD'
+    }).format(amount);
+  }
+
+  getRevenueChartData(): any[] {
+    return this.dashboardData?.revenueChart || [];
+  }
+
+  getOrderStatusChartData(): any[] {
+    return this.dashboardData?.orderStatusChart || [];
+  }
+
+  getTopProductsData(): any[] {
+    return this.dashboardData?.topProducts || [];
   }
 }

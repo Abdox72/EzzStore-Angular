@@ -32,6 +32,18 @@ export class UserOrdersComponent implements OnInit {
   searchSubject = new Subject<string>();
   currentStatusFilter = 'all';
 
+  // Pagination properties
+  currentPage = 1;
+  pageSize = 5;
+  totalItems = 0;
+  totalPages = 0;
+  hasNextPage = false;
+  hasPreviousPage = false;
+  paginatedOrders: Order[] = [];
+
+  // Make Math available in template
+  Math = Math;
+
   constructor(
     private orderService: OrderService,
     private authService: AuthService,
@@ -67,6 +79,7 @@ export class UserOrdersComponent implements OnInit {
         this.orders = orders;
         this.filteredOrders = [...orders];
         this.loading = false;
+        this.updatePagination();
       },
       error: (error) => {
         this.error = 'حدث خطأ في تحميل الطلبات';
@@ -105,6 +118,8 @@ export class UserOrdersComponent implements OnInit {
     }
     
     this.filteredOrders = result;
+    this.currentPage = 1; // Reset to first page when filtering
+    this.updatePagination();
   }
 
   selectOrder(order: Order): void {
@@ -188,7 +203,6 @@ export class UserOrdersComponent implements OnInit {
     switch (status) {
       case 'pending': return 'status-pending';
       case 'confirmed': return 'status-confirmed';
-      case 'processing': return 'status-processing';
       case 'shipped': return 'status-shipped';
       case 'delivered': return 'status-delivered';
       case 'cancelled': return 'status-cancelled';
@@ -201,7 +215,6 @@ export class UserOrdersComponent implements OnInit {
     switch (status) {
       case 'pending': return 'hourglass_empty';
       case 'confirmed': return 'check_circle';
-      case 'processing': return 'autorenew';
       case 'shipped': return 'local_shipping';
       case 'delivered': return 'inventory';
       case 'cancelled': return 'cancel';
@@ -236,5 +249,41 @@ return new Date(dateString).toLocaleDateString('ar-SA', { calendar: 'gregory' })
 
   getTotalItems(order: Order): number {
     return order.orderItems.reduce((total, item) => total + item.quantity, 0);
+  }
+
+  // Pagination methods
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.pageSize = parseInt(target.value);
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    this.totalItems = this.filteredOrders.length;
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.hasPreviousPage = this.currentPage > 1;
+    this.hasNextPage = this.currentPage < this.totalPages;
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedOrders = this.filteredOrders.slice(startIndex, endIndex);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
   }
 }

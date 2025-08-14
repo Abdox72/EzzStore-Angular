@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { OrderService, Order } from '../../../services/order.service';
+import { PaginatedResponse, OrderFilterParameters } from '../../../interfaces/pagination';
 
 @Component({
   selector: 'app-admin-orders',
@@ -18,10 +19,30 @@ export class AdminOrdersComponent implements OnInit {
   loading = false;
   error = '';
 
+  // Make Math available in template
+  Math = Math;
+
+  // Pagination properties
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 0;
+  hasNextPage = false;
+  hasPreviousPage = false;
+
   // Filter properties
   statusFilter = '';
   paymentStatusFilter = '';
+  paymentMethodFilter = '';
   searchTerm = '';
+  startDate: string = '';
+  endDate: string = '';
+  minAmount: number | null = null;
+  maxAmount: number | null = null;
+  customerName = '';
+  customerEmail = '';
+  sortBy = '';
+  sortDescending = false;
 
   // Form properties
   statusForm: FormGroup;
@@ -51,6 +72,12 @@ export class AdminOrdersComponent implements OnInit {
     { value: 'paid', label: 'تم الدفع' },
     { value: 'failed', label: 'فشل الدفع' },
     { value: 'refunded', label: 'تم الاسترداد' }
+  ];
+
+  paymentMethods = [
+    { value: 'stripe', label: 'Stripe' },
+    { value: 'paypal', label: 'PayPal' },
+    { value: 'whatsapp', label: 'واتساب' }
   ];
 
   constructor(
@@ -83,10 +110,31 @@ export class AdminOrdersComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.orderService.getAllOrders().subscribe({
-      next: (orders) => {
-        this.orders = orders;
-        this.applyFilters();
+    const filterParams: OrderFilterParameters = {
+      pageNumber: this.currentPage,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      sortDescending: this.sortDescending,
+      status: this.statusFilter || undefined,
+      paymentStatus: this.paymentStatusFilter || undefined,
+      paymentMethod: this.paymentMethodFilter || undefined,
+      startDate: this.startDate ? new Date(this.startDate) : undefined,
+      endDate: this.endDate ? new Date(this.endDate) : undefined,
+      minAmount: this.minAmount || undefined,
+      maxAmount: this.maxAmount || undefined,
+      customerName: this.customerName || undefined,
+      customerEmail: this.customerEmail || undefined
+    };
+
+    this.orderService.getPaginatedOrders(filterParams).subscribe({
+      next: (response: PaginatedResponse<Order>) => {
+        this.orders = response.data;
+        this.filteredOrders = response.data;
+        this.totalItems = response.totalCount;
+        this.totalPages = response.totalPages;
+        this.hasNextPage = response.hasNextPage;
+        this.hasPreviousPage = response.hasPreviousPage;
         this.loading = false;
       },
       error: (err) => {
@@ -97,17 +145,53 @@ export class AdminOrdersComponent implements OnInit {
     });
   }
 
-  applyFilters(): void {
-    this.filteredOrders = this.orders.filter(order => {
-      const matchesStatus = !this.statusFilter || order.orderStatus === this.statusFilter;
-      const matchesPaymentStatus = !this.paymentStatusFilter || order.paymentStatus === this.paymentStatusFilter;
-      const matchesSearch = !this.searchTerm || 
-        order.customerName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        order.customerEmail.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        order.id.toString().includes(this.searchTerm);
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadOrders();
+  }
 
-      return matchesStatus && matchesPaymentStatus && matchesSearch;
-    });
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.pageSize = parseInt(target.value);
+    this.currentPage = 1;
+    this.loadOrders();
+  }
+
+  applyFilters(): void {
+    this.currentPage = 1;
+    this.loadOrders();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.paymentStatusFilter = '';
+    this.paymentMethodFilter = '';
+    this.searchTerm = '';
+    this.startDate = '';
+    this.endDate = '';
+    this.minAmount = null;
+    this.maxAmount = null;
+    this.customerName = '';
+    this.customerEmail = '';
+    this.sortBy = '';
+    this.sortDescending = false;
+    this.currentPage = 1;
+    this.loadOrders();
+  }
+
+  onSortChange(field: string): void {
+    if (this.sortBy === field) {
+      this.sortDescending = !this.sortDescending;
+    } else {
+      this.sortBy = field;
+      this.sortDescending = false;
+    }
+    this.loadOrders();
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortBy !== field) return '↕️';
+    return this.sortDescending ? '↓' : '↑';
   }
 
   onStatusFilterChange(): void {
@@ -118,7 +202,19 @@ export class AdminOrdersComponent implements OnInit {
     this.applyFilters();
   }
 
+  onPaymentMethodFilterChange(): void {
+    this.applyFilters();
+  }
+
   onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  onDateChange(): void {
+    this.applyFilters();
+  }
+
+  onAmountChange(): void {
     this.applyFilters();
   }
 
@@ -145,7 +241,7 @@ export class AdminOrdersComponent implements OnInit {
         if (index !== -1) {
           this.orders[index] = updatedOrder;
         }
-        this.applyFilters();
+        this.loadOrders();
         this.loading = false;
         this.selectedOrder = null;
         this.statusForm.reset();
@@ -171,7 +267,7 @@ export class AdminOrdersComponent implements OnInit {
         if (index !== -1) {
           this.orders[index] = updatedOrder;
         }
-        this.applyFilters();
+        this.loadOrders();
         this.loading = false;
         this.selectedOrder = null;
         this.trackingForm.reset();
@@ -197,7 +293,7 @@ export class AdminOrdersComponent implements OnInit {
         if (index !== -1) {
           this.orders[index] = refundedOrder;
         }
-        this.applyFilters();
+        this.loadOrders();
         this.loading = false;
         this.selectedOrder = null;
         this.refundForm.reset();
@@ -223,7 +319,7 @@ export class AdminOrdersComponent implements OnInit {
         if (index !== -1) {
           this.orders[index] = updatedOrder;
         }
-        this.applyFilters();
+        this.loadOrders();
         this.loading = false;
         this.selectedOrder = null;
         this.paymentStatusForm.reset();
@@ -331,5 +427,18 @@ export class AdminOrdersComponent implements OnInit {
 
   canAddTracking(order: Order): boolean {
     return order.orderStatus === 'confirmed' || order.orderStatus === 'shipped';
+  }
+
+  // Pagination helper methods
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
   }
 }

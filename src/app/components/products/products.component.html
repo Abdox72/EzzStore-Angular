@@ -44,8 +44,19 @@
         <span class="search-icon">🔍</span>
       </div>
 
+      <div class="page-size-controls" *ngIf="totalPages > 1">
+        <div class="page-size-selector">
+          <label for="page-size">عدد العناصر في الصفحة:</label>
+          <select id="page-size" (change)="onPageSizeChange($event)">
+            <option value="12">12</option>
+            <option value="24">24</option>
+            <option value="48">48</option>
+          </select>
+        </div>
+      </div>
+
       <div class="products-grid">
-        <div class="product-card" *ngFor="let product of filteredProducts">
+        <div class="product-card" *ngFor="let product of paginatedProducts">
           <div class="product-image">
             <img [src]="staticFiles+product.images?.[0]?.imageUrl || '/assets/images/placeholder.jpg'" [alt]="product.title">
           </div>
@@ -68,6 +79,33 @@
             <button class="add-to-cart" (click)="addToCart(product)">إضافة إلى السلة</button>
             <a [routerLink]="['/products', product.id]" class="view-details">عرض التفاصيل</a>
           </div>
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="pagination-section" *ngIf="totalPages > 1">
+        <div class="pagination-info">
+          عرض {{ (currentPage - 1) * pageSize + 1 }} إلى {{ Math.min(currentPage * pageSize, totalItems) }} 
+          من أصل {{ totalItems }} منتج
+        </div>
+        
+        <div class="pagination-controls">
+          <button class="btn btn-sm" [disabled]="!hasPreviousPage" (click)="onPageChange(currentPage - 1)">
+            السابق
+          </button>
+          
+          <div class="page-numbers">
+            <button *ngFor="let page of getPageNumbers()" 
+                    class="btn btn-sm" 
+                    [class.active]="page === currentPage"
+                    (click)="onPageChange(page)">
+              {{ page }}
+            </button>
+          </div>
+          
+          <button class="btn btn-sm" [disabled]="!hasNextPage" (click)="onPageChange(currentPage + 1)">
+            التالي
+          </button>
         </div>
       </div>
 

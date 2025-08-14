@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { PaginatedResponse, OrderFilterParameters } from '../interfaces/pagination';
 
 export interface OrderItem {
   id: number;
@@ -149,6 +150,51 @@ export class OrderService {
     }
     
     return this.http.get<Order[]>(url);
+  }
+
+  getPaginatedOrders(filterParams: OrderFilterParameters): Observable<PaginatedResponse<Order>> {
+    let params = new HttpParams()
+      .set('pageNumber', filterParams.pageNumber.toString())
+      .set('pageSize', filterParams.pageSize.toString());
+
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
+    if (filterParams.sortBy) {
+      params = params.set('sortBy', filterParams.sortBy);
+    }
+    if (filterParams.sortDescending !== undefined) {
+      params = params.set('sortDescending', filterParams.sortDescending.toString());
+    }
+    if (filterParams.status) {
+      params = params.set('status', filterParams.status);
+    }
+    if (filterParams.paymentStatus) {
+      params = params.set('paymentStatus', filterParams.paymentStatus);
+    }
+    if (filterParams.paymentMethod) {
+      params = params.set('paymentMethod', filterParams.paymentMethod);
+    }
+    if (filterParams.startDate) {
+      params = params.set('startDate', filterParams.startDate.toISOString());
+    }
+    if (filterParams.endDate) {
+      params = params.set('endDate', filterParams.endDate.toISOString());
+    }
+    if (filterParams.minAmount) {
+      params = params.set('minAmount', filterParams.minAmount.toString());
+    }
+    if (filterParams.maxAmount) {
+      params = params.set('maxAmount', filterParams.maxAmount.toString());
+    }
+    if (filterParams.customerName) {
+      params = params.set('customerName', filterParams.customerName);
+    }
+    if (filterParams.customerEmail) {
+      params = params.set('customerEmail', filterParams.customerEmail);
+    }
+
+    return this.http.get<PaginatedResponse<Order>>(`${this.apiUrl}/admin/paginated`, { params });
   }
 
   updateOrderStatus(id: number, status: string): Observable<Order> {

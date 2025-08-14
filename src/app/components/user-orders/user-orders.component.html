@@ -20,7 +20,7 @@
         <select id="status-filter" [(ngModel)]="currentStatusFilter" (ngModelChange)="filterByStatus()">
           <option value="all">جميع الطلبات</option>
           <option value="pending">قيد الانتظار</option>
-          <option value="processing">قيد المعالجة</option>
+          <option value="confirmed">مؤكد</option>
           <option value="shipped">تم الشحن</option>
           <option value="delivered">تم التوصيل</option>
           <option value="cancelled">ملغي</option>
@@ -36,6 +36,14 @@
           (ngModelChange)="searchSubject.next($event)"
         >
       </div>
+      <div class="filter-group">
+        <label for="page-size">عدد العناصر في الصفحة:</label>
+        <select id="page-size" (change)="onPageSizeChange($event)">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+        </select>
+      </div>
     </div>
     <div class="empty-orders" *ngIf="filteredOrders.length === 0 && !loading && !error">
       <div class="empty-state">
@@ -47,7 +55,7 @@
     </div>
 
     <div class="orders-list" *ngIf="filteredOrders.length > 0 && !loading && !error">
-      <div class="order-card" *ngFor="let order of filteredOrders" (click)="selectOrder(order)">
+      <div class="order-card" *ngFor="let order of paginatedOrders" (click)="selectOrder(order)">
         <div class="order-header">
           <div class="order-info">
             <h3 class="order-title">طلب #{{ order.id }}</h3>
@@ -99,6 +107,33 @@
             <span>تتبع</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-section" *ngIf="totalPages > 1">
+      <div class="pagination-info">
+        عرض {{ (currentPage - 1) * pageSize + 1 }} إلى {{ Math.min(currentPage * pageSize, totalItems) }} 
+        من أصل {{ totalItems }} طلب
+      </div>
+      
+      <div class="pagination-controls">
+        <button class="btn btn-sm" [disabled]="!hasPreviousPage" (click)="onPageChange(currentPage - 1)">
+          السابق
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="btn btn-sm" 
+                  [class.active]="page === currentPage"
+                  (click)="onPageChange(page)">
+            {{ page }}
+          </button>
+        </div>
+        
+        <button class="btn btn-sm" [disabled]="!hasNextPage" (click)="onPageChange(currentPage + 1)">
+          التالي
+        </button>
       </div>
     </div>
   </div>

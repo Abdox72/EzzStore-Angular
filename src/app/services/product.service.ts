@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product, Category } from '../interfaces/product';
 import { environment } from '../../environments/environment';
+import { PaginatedResponse, ProductFilterParameters } from '../interfaces/pagination';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,42 @@ export class ProductService {
   // Product methods
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(this.apiUrl);
+  }
+
+  getPaginatedProducts(filterParams: ProductFilterParameters): Observable<PaginatedResponse<Product>> {
+    let params = new HttpParams()
+      .set('pageNumber', filterParams.pageNumber.toString())
+      .set('pageSize', filterParams.pageSize.toString());
+
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
+    if (filterParams.sortBy) {
+      params = params.set('sortBy', filterParams.sortBy);
+    }
+    if (filterParams.sortDescending !== undefined) {
+      params = params.set('sortDescending', filterParams.sortDescending.toString());
+    }
+    if (filterParams.categoryId) {
+      params = params.set('categoryId', filterParams.categoryId.toString());
+    }
+    if (filterParams.minPrice) {
+      params = params.set('minPrice', filterParams.minPrice.toString());
+    }
+    if (filterParams.maxPrice) {
+      params = params.set('maxPrice', filterParams.maxPrice.toString());
+    }
+    if (filterParams.minStock) {
+      params = params.set('minStock', filterParams.minStock.toString());
+    }
+    if (filterParams.maxStock) {
+      params = params.set('maxStock', filterParams.maxStock.toString());
+    }
+    if (filterParams.inStock !== undefined) {
+      params = params.set('inStock', filterParams.inStock.toString());
+    }
+
+    return this.http.get<PaginatedResponse<Product>>(`${this.apiUrl}/paginated`, { params });
   }
 
   getProduct(id: number): Observable<Product> {

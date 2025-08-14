@@ -1,101 +1,179 @@
-<div class="admin-dashboard">
-  <div class="header">
+<div class="dashboard-container">
+  <div class="dashboard-header">
     <h1>لوحة التحكم</h1>
+    <p>مرحباً بك في لوحة تحكم متجر EzzStore</p>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">📦</div>
-      <div class="stat-info">
-        <h3>المنتجات</h3>
-        <p class="stat-value">{{ totalProducts }}</p>
+  <!-- Date Range Filter -->
+  <div class="date-filter-section">
+    <form [formGroup]="dateRangeForm" (ngSubmit)="onDateRangeSubmit()" class="date-filter-form">
+      <div class="form-group">
+        <label for="startDate">من تاريخ:</label>
+        <input type="date" id="startDate" formControlName="startDate" class="form-control">
       </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">🏷️</div>
-      <div class="stat-info">
-        <h3>التصنيفات</h3>
-        <p class="stat-value">{{ totalCategories }}</p>
+      <div class="form-group">
+        <label for="endDate">إلى تاريخ:</label>
+        <input type="date" id="endDate" formControlName="endDate" class="form-control">
       </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">👥</div>
-      <div class="stat-info">
-        <h3>المستخدمين</h3>
-        <p class="stat-value">{{ totalUsers }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">🛒</div>
-      <div class="stat-info">
-        <h3>الطلبات</h3>
-        <p class="stat-value">{{ totalOrders }}</p>
-      </div>
-    </div>
+      <button type="submit" class="btn btn-primary" [disabled]="!dateRangeForm.valid || loading">
+        {{ loading ? 'جاري التحميل...' : 'تطبيق الفلتر' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="resetDateRange()">
+        إعادة تعيين
+      </button>
+    </form>
   </div>
 
-  <div class="recent-orders">
-    <div class="section-header">
-      <h2>آخر الطلبات</h2>
-      <a routerLink="/admin/orders" class="view-all">عرض الكل</a>
-    </div>
-
-    <div class="orders-table">
-      <table>
-        <thead>
-          <tr>
-            <th>رقم الطلب</th>
-            <th>المستخدم</th>
-            <th>المبلغ</th>
-            <th>الحالة</th>
-            <th>التاريخ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of recentOrders">
-            <td>#{{ order.id }}</td>
-            <td>{{ order.customerName }}</td>
-            <td>{{ order.totalAmount | currency:'KWD' }}</td>
-            <td>
-              <span class="status-badge" [class]="getStatusClass(order.orderStatus)">
-                {{ getStatusText(order.orderStatus) }}
-              </span>
-            </td>
-            <td>{{ order.createdAt | date:'short' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
   </div>
 
-  <div class="quick-actions">
-    <div class="section-header">
-      <h2>إجراءات سريعة</h2>
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>جاري تحميل البيانات...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="dashboardData && !loading" class="dashboard-content">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon products-icon">📦</div>
+        <div class="stat-content">
+          <h3>{{ dashboardData.totalProducts }}</h3>
+          <p>إجمالي المنتجات</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon categories-icon">🏷️</div>
+        <div class="stat-content">
+          <h3>{{ dashboardData.totalCategories }}</h3>
+          <p>إجمالي الفئات</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon users-icon">👥</div>
+        <div class="stat-content">
+          <h3>{{ dashboardData.totalUsers }}</h3>
+          <p>إجمالي المستخدمين</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon orders-icon">📋</div>
+        <div class="stat-content">
+          <h3>{{ dashboardData.totalOrders }}</h3>
+          <p>إجمالي الطلبات</p>
+        </div>
+      </div>
+
+      <div class="stat-card revenue-card">
+        <div class="stat-icon revenue-icon">💰</div>
+        <div class="stat-content">
+          <h3>{{ formatCurrency(dashboardData.totalRevenue) }}</h3>
+          <p>إجمالي الإيرادات</p>
+        </div>
+      </div>
+
+      <div class="stat-card monthly-revenue-card">
+        <div class="stat-icon monthly-icon">📅</div>
+        <div class="stat-content">
+          <h3>{{ formatCurrency(dashboardData.monthlyRevenue) }}</h3>
+          <p>إيرادات الشهر</p>
+        </div>
+      </div>
     </div>
 
-    <div class="actions-grid">
-      <a routerLink="/admin/products/" class="action-card">
-        <div class="action-icon">➕</div>
-        <h3>إضافة منتج</h3>
-      </a>
+    <!-- Order Status Overview -->
+    <div class="order-status-section">
+      <h2>نظرة عامة على حالة الطلبات</h2>
+      <div class="order-status-grid">
+        <div class="status-card pending">
+          <h4>{{ dashboardData.pendingOrders }}</h4>
+          <p>قيد الانتظار</p>
+        </div>
+        <div class="status-card confirmed">
+          <h4>{{ dashboardData.shippedOrders }}</h4>
+          <p>تم الشحن</p>
+        </div>
+        <div class="status-card shipped">
+          <h4>{{ dashboardData.deliveredOrders }}</h4>
+          <p>تم التوصيل</p>
+        </div>
+        <div class="status-card delivered">
+          <h4>{{ dashboardData.cancelledOrders }}</h4>
+          <p>ملغي</p>
+        </div>
+      </div>
+    </div>
 
-      <a routerLink="/admin/categories/" class="action-card">
-        <div class="action-icon">🏷️</div>
-        <h3>إضافة تصنيف</h3>
-      </a>
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-container">
+        <h3>الإيرادات اليومية</h3>
+        <div class="revenue-chart">
+          <div *ngFor="let item of getRevenueChartData()" class="chart-bar">
+            <div class="bar" [style.height.px]="item.revenue / 10"></div>
+            <span class="bar-label">{{ item.period }}</span>
+            <span class="bar-value">{{ formatCurrency(item.revenue) }}</span>
+          </div>
+        </div>
+      </div>
 
-      <a routerLink="/admin/users/" class="action-card">
-        <div class="action-icon">👤</div>
-        <h3>إضافة مستخدم</h3>
-      </a>
+      <div class="chart-container">
+        <h3>توزيع حالة الطلبات</h3>
+        <div class="order-status-chart">
+          <div *ngFor="let item of getOrderStatusChartData()" class="chart-item">
+            <div class="chart-color" [style.background-color]="item.color"></div>
+            <span class="chart-label">{{ getStatusText(item.status) }}</span>
+            <span class="chart-value">{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <a routerLink="/admin/orders" class="action-card">
-        <div class="action-icon">📋</div>
-        <h3>إدارة الطلبات</h3>
-      </a>
+    <!-- Top Products -->
+    <div class="top-products-section">
+      <h2>أفضل المنتجات مبيعاً</h2>
+      <div class="top-products-grid">
+        <div *ngFor="let product of getTopProductsData()" class="product-card">
+          <div class="product-image">
+            <img [src]="staticFiles+product.imageUrl || 'assets/images/placeholder.jpg'" [alt]="product.productName">
+          </div>
+          <div class="product-info">
+            <h4>{{ product.productName }}</h4>
+            <p>الكمية المباعة: {{ product.totalSold }}</p>
+            <p>الإيرادات: {{ formatCurrency(product.totalRevenue) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="recent-orders-section">
+      <h2>أحدث الطلبات</h2>
+      <div class="orders-table">
+        <div class="table-header">
+          <span>رقم الطلب</span>
+          <span>اسم العميل</span>
+          <span>المبلغ</span>
+          <span>الحالة</span>
+          <span>التاريخ</span>
+        </div>
+        <div *ngFor="let order of dashboardData.recentOrders" class="table-row">
+          <span>#{{ order.id }}</span>
+          <span>{{ order.customerName }}</span>
+          <span>{{ formatCurrency(order.totalAmount) }}</span>
+          <span class="status-badge mx-3" [ngClass]="getStatusClass(order.orderStatus)">
+            {{ getStatusText(order.orderStatus) }}
+          </span>
+          <span class="ms-3" style="margin: 0 10px;">{{ order.createdAt | date:'short' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -5,6 +5,7 @@ import { ProductService } from '../../../services/product.service';
 import { Product, Category } from '../../../interfaces/product';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
+import { PaginatedResponse, ProductFilterParameters } from '../../../interfaces/pagination';
 
 @Component({
   selector: 'app-admin-products',
@@ -16,16 +17,38 @@ import { environment } from '../../../../environments/environment';
 export class AdminProductsComponent implements OnInit {
   products: Product[] = [];
   categories: Category[] = [];
-  filteredProducts: Product[] = [];
+  loading = false;
+  error = '';
+
+  // Make Math available in template
+  Math = Math;
+
+  // Pagination properties
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 0;
+  hasNextPage = false;
+  hasPreviousPage = false;
+
+  // Filter properties
   searchTerm = '';
   selectedCategory: number | null = null;
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
+  minStock: number | null = null;
+  maxStock: number | null = null;
+  inStock: boolean | null = null;
+  sortBy = '';
+  sortDescending = false;
+
   selectedProduct: Product | null = null;
   selectedFiles: File[] = [];
 
   isModalOpen = false;
   productForm: FormGroup;
   imagePreview: string | null = null;
-  staticFiles:string = environment.staticFiles;
+  staticFiles: string = environment.staticFiles;
 
   constructor(
     private productService: ProductService,
@@ -47,9 +70,37 @@ export class AdminProductsComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.productService.getProducts().subscribe(products => {
-      this.products = products;
-      this.filterProducts();
+    this.loading = true;
+    this.error = '';
+
+    const filterParams: ProductFilterParameters = {
+      pageNumber: this.currentPage,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      sortDescending: this.sortDescending,
+      categoryId: this.selectedCategory || undefined,
+      minPrice: this.minPrice || undefined,
+      maxPrice: this.maxPrice || undefined,
+      minStock: this.minStock || undefined,
+      maxStock: this.maxStock || undefined,
+      inStock: this.inStock !== null ? this.inStock : undefined
+    };
+
+    this.productService.getPaginatedProducts(filterParams).subscribe({
+      next: (response: PaginatedResponse<Product>) => {
+        this.products = response.data;
+        this.totalItems = response.totalCount;
+        this.totalPages = response.totalPages;
+        this.hasNextPage = response.hasNextPage;
+        this.hasPreviousPage = response.hasPreviousPage;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'فشل في تحميل المنتجات';
+        this.loading = false;
+        console.error('Error loading products:', err);
+      }
     });
   }
 
@@ -59,16 +110,63 @@ export class AdminProductsComponent implements OnInit {
     });
   }
 
-  filterProducts(): void {
-    this.filteredProducts = this.products.filter(product => {
-      const matchesSearch = product.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                          product.description.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesCategory = !this.selectedCategory || product.categoryId == this.selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-    if (this.filteredProducts.length === 0) {
-      this.toastr.info('لم يتم العثور على منتجات تطابق معايير البحث', 'نتيجة البحث');
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadProducts();
+  }
+
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.pageSize = parseInt(target.value);
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  applyFilters(): void {
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.selectedCategory = null;
+    this.minPrice = null;
+    this.maxPrice = null;
+    this.minStock = null;
+    this.maxStock = null;
+    this.inStock = null;
+    this.sortBy = '';
+    this.sortDescending = false;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  onSortChange(field: string): void {
+    if (this.sortBy === field) {
+      this.sortDescending = !this.sortDescending;
+    } else {
+      this.sortBy = field;
+      this.sortDescending = false;
     }
+    this.loadProducts();
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortBy !== field) return '↕️';
+    return this.sortDescending ? '↓' : '↑';
+  }
+
+  // Pagination helper methods
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
   }
 
   openModal(product?: Product): void {

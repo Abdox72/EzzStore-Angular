@@ -1,12 +1,13 @@
-<div class="admin-orders">
+<div class="admin-orders-container">
   <div class="header">
     <h1>إدارة الطلبات</h1>
-    <p>إدارة جميع الطلبات وتحديث حالاتها</p>
+    <p>إدارة جميع طلبات العملاء</p>
   </div>
 
-  <!-- Filters Section -->
+  <!-- Advanced Filters Section -->
   <div class="filters-section">
     <div class="filters-grid">
+      <!-- Basic Filters -->
       <div class="filter-group">
         <label for="statusFilter">حالة الطلب:</label>
         <select id="statusFilter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
@@ -21,200 +22,302 @@
         <label for="paymentStatusFilter">حالة الدفع:</label>
         <select id="paymentStatusFilter" [(ngModel)]="paymentStatusFilter" (change)="onPaymentStatusFilterChange()">
           <option value="">جميع حالات الدفع</option>
-          <option *ngFor="let status of paymentStatuses" [value]="status.value">
+          <option *ngFor="let status of paymentStatusOptions" [value]="status.value">
             {{ status.label }}
           </option>
         </select>
       </div>
 
       <div class="filter-group">
-        <label for="searchTerm">بحث:</label>
-        <input 
-          type="text" 
-          id="searchTerm" 
-          [(ngModel)]="searchTerm" 
-          (input)="onSearchChange()"
-          placeholder="اسم العميل، البريد الإلكتروني، أو رقم الطلب"
-        >
+        <label for="paymentMethodFilter">طريقة الدفع:</label>
+        <select id="paymentMethodFilter" [(ngModel)]="paymentMethodFilter" (change)="onPaymentMethodFilterChange()">
+          <option value="">جميع الطرق</option>
+          <option *ngFor="let method of paymentMethods" [value]="method.value">
+            {{ method.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="searchTerm">البحث:</label>
+        <input type="text" id="searchTerm" [(ngModel)]="searchTerm" (input)="onSearchChange()" 
+               placeholder="اسم العميل، البريد الإلكتروني، رقم الطلب...">
+      </div>
+    </div>
+
+    <!-- Date Range Filters -->
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="startDate">من تاريخ:</label>
+        <input type="date" id="startDate" [(ngModel)]="startDate" (change)="onDateChange()">
+      </div>
+
+      <div class="filter-group">
+        <label for="endDate">إلى تاريخ:</label>
+        <input type="date" id="endDate" [(ngModel)]="endDate" (change)="onDateChange()">
+      </div>
+
+      <div class="filter-group">
+        <label for="minAmount">الحد الأدنى للمبلغ:</label>
+        <input type="number" id="minAmount" [(ngModel)]="minAmount" (input)="onAmountChange()" 
+               placeholder="0" min="0" step="0.01">
+      </div>
+
+      <div class="filter-group">
+        <label for="maxAmount">الحد الأقصى للمبلغ:</label>
+        <input type="number" id="maxAmount" [(ngModel)]="maxAmount" (input)="onAmountChange()" 
+               placeholder="1000" min="0" step="0.01">
+      </div>
+    </div>
+
+    <!-- Customer Filters -->
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="customerName">اسم العميل:</label>
+        <input type="text" id="customerName" [(ngModel)]="customerName" (input)="onSearchChange()" 
+               placeholder="اسم العميل...">
+      </div>
+
+      <div class="filter-group">
+        <label for="customerEmail">البريد الإلكتروني:</label>
+        <input type="email" id="customerEmail" [(ngModel)]="customerEmail" (input)="onSearchChange()" 
+               placeholder="البريد الإلكتروني...">
+      </div>
+
+      <div class="filter-group">
+        <label for="pageSize">عدد العناصر في الصفحة:</label>
+        <select id="pageSize" (change)="onPageSizeChange($event)">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" (click)="applyFilters()" [disabled]="loading">
+          {{ loading ? 'جاري التحميل...' : 'تطبيق الفلتر' }}
+        </button>
+        <button class="btn btn-secondary" (click)="clearFilters()">
+          مسح الفلاتر
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Error Display -->
+  <!-- Error Message -->
   <div *ngIf="error" class="error-message">
     {{ error }}
   </div>
 
-  <!-- Loading Indicator -->
-  <div *ngIf="loading" class="loading">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-spinner">
     <div class="spinner"></div>
-    <p>جاري التحميل...</p>
+    <p>جاري تحميل الطلبات...</p>
   </div>
 
   <!-- Orders Table -->
-  <div class="orders-table" *ngIf="!loading">
-    <table>
-      <thead>
-        <tr>
-          <th>رقم الطلب</th>
-          <th>العميل</th>
-          <th>البريد الإلكتروني</th>
-          <th>المبلغ</th>
-          <th>طريقة الدفع</th>
-          <th>حالة الدفع</th>
-          <th>حالة الطلب</th>
-          <th>التاريخ</th>
-          <th>الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of filteredOrders" 
-            [class.selected]="selectedOrder?.id === order.id"
-            (click)="selectOrder(order)">
-          <td>#{{ order.id }}</td>
-          <td>{{ order.customerName }}</td>
-          <td>{{ order.customerEmail }}</td>
-          <td>{{ order.totalAmount | currency:'KWD' }}</td>
-          <td>{{ getPaymentMethodText(order.paymentMethod) }}</td>
-          <td>
-            <span class="status-badge" [class]="getPaymentStatusClass(order.paymentStatus)">
-              {{ getPaymentStatusText(order.paymentStatus) }}
-            </span>
-          </td>
-          <td>
-            <span class="status-badge" [class]="getStatusClass(order.orderStatus)">
-              {{ getStatusText(order.orderStatus) }}
-            </span>
-          </td>
-          <td>{{ order.createdAt | date:'short' }}</td>
-          <td>
-            <button class="btn-select" (click)="selectOrder(order)">
-              تحديد
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div *ngIf="!loading && orders.length > 0" class="orders-section">
+    <div class="table-container">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th (click)="onSortChange('id')" class="sortable">
+              رقم الطلب {{ getSortIcon('id') }}
+            </th>
+            <th (click)="onSortChange('customer')" class="sortable">
+              العميل {{ getSortIcon('customer') }}
+            </th>
+            <th (click)="onSortChange('amount')" class="sortable">
+              المبلغ {{ getSortIcon('amount') }}
+            </th>
+            <th (click)="onSortChange('status')" class="sortable">
+              الحالة {{ getSortIcon('status') }}
+            </th>
+            <th (click)="onSortChange('date')" class="sortable">
+              التاريخ {{ getSortIcon('date') }}
+            </th>
+            <th>طريقة الدفع</th>
+            <th>حالة الدفع</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of orders" (click)="selectOrder(order)" 
+              [class.selected]="selectedOrder?.id === order.id">
+            <td>#{{ order.id }}</td>
+            <td>
+              <div class="customer-info">
+                <div class="customer-name">{{ order.customerName }}</div>
+                <div class="customer-email">{{ order.customerEmail }}</div>
+                <div class="customer-phone">{{ order.customerPhone }}</div>
+              </div>
+            </td>
+            <td class="amount">{{ order.totalAmount | currency:'KWD' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(order.orderStatus)">
+                {{ getStatusText(order.orderStatus) }}
+              </span>
+            </td>
+            <td>{{ order.createdAt | date:'short' }}</td>
+            <td>{{ getPaymentMethodText(order.paymentMethod) }}</td>
+            <td>
+              <span class="payment-status-badge" [ngClass]="getPaymentStatusClass(order.paymentStatus)">
+                {{ getPaymentStatusText(order.paymentStatus) }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary" (click)="selectOrder(order)">
+                إدارة
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div *ngIf="filteredOrders.length === 0" class="no-orders">
-      <p>لا توجد طلبات</p>
+    <!-- Pagination Controls -->
+    <div class="pagination-section">
+      <div class="pagination-info">
+        عرض {{ (currentPage - 1) * pageSize + 1 }} إلى {{ Math.min(currentPage * pageSize, totalItems) }} 
+        من أصل {{ totalItems }} طلب
+      </div>
+      
+      <div class="pagination-controls">
+        <button class="btn btn-sm" [disabled]="!hasPreviousPage" (click)="onPageChange(currentPage - 1)">
+          السابق
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="btn btn-sm" 
+                  [class.active]="page === currentPage"
+                  (click)="onPageChange(page)">
+            {{ page }}
+          </button>
+        </div>
+        
+        <button class="btn btn-sm" [disabled]="!hasNextPage" (click)="onPageChange(currentPage + 1)">
+          التالي
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Order Details Sidebar -->
-  <div class="order-details" *ngIf="selectedOrder">
-    <div class="sidebar-header">
-      <h3>تفاصيل الطلب #{{ selectedOrder.id }}</h3>
-      <button class="btn-close" (click)="clearSelection()">×</button>
-    </div>
+  <!-- No Orders Message -->
+  <div *ngIf="!loading && orders.length === 0" class="no-orders">
+    <p>لا توجد طلبات تطابق معايير البحث</p>
+  </div>
 
-    <div class="order-info">
-      <div class="info-section">
-        <h4>معلومات العميل</h4>
-        <p><strong>الاسم:</strong> {{ selectedOrder.customerName }}</p>
-        <p><strong>البريد الإلكتروني:</strong> {{ selectedOrder.customerEmail }}</p>
-        <p><strong>الهاتف:</strong> {{ selectedOrder.customerPhone }}</p>
-        <p *ngIf="selectedOrder.customerAddress"><strong>العنوان:</strong> {{ selectedOrder.customerAddress }}</p>
-        <p *ngIf="selectedOrder.customerCity"><strong>المدينة:</strong> {{ selectedOrder.customerCity }}</p>
-        <p *ngIf="selectedOrder.customerPostalCode"><strong>الرمز البريدي:</strong> {{ selectedOrder.customerPostalCode }}</p>
+  <!-- Order Management Modal -->
+  <div *ngIf="selectedOrder" class="modal-overlay" (click)="clearSelection()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>إدارة الطلب #{{ selectedOrder.id }}</h3>
+        <button class="close-btn" (click)="clearSelection()">&times;</button>
       </div>
 
-      <div class="info-section">
-        <h4>تفاصيل الطلب</h4>
-        <p><strong>المبلغ الإجمالي:</strong> {{ selectedOrder.totalAmount | currency:'KWD' }}</p>
-        <p><strong>طريقة الدفع:</strong> {{ getPaymentMethodText(selectedOrder.paymentMethod) }}</p>
-        <p><strong>حالة الدفع:</strong> {{ getPaymentStatusText(selectedOrder.paymentStatus) }}</p>
-        <p><strong>حالة الطلب:</strong> {{ getStatusText(selectedOrder.orderStatus) }}</p>
-        <p><strong>تاريخ الطلب:</strong> {{ selectedOrder.createdAt | date:'full' }}</p>
-      </div>
-
-      <div class="info-section" *ngIf="selectedOrder.trackingNumber">
-        <h4>معلومات التتبع</h4>
-        <p><strong>رقم التتبع:</strong> {{ selectedOrder.trackingNumber }}</p>
-        <p><strong>شركة الشحن:</strong> {{ selectedOrder.carrier }}</p>
-        <p *ngIf="selectedOrder.shippedAt"><strong>تاريخ الشحن:</strong> {{ selectedOrder.shippedAt | date:'full' }}</p>
-      </div>
-
-      <div class="info-section">
-        <h4>المنتجات</h4>
-        <div class="order-items">
-          <div *ngFor="let item of selectedOrder.orderItems" class="order-item">
-            <span class="item-name">{{ item.productName }}</span>
-            <span class="item-quantity">×{{ item.quantity }}</span>
-            <span class="item-price">{{ item.totalPrice | currency:'KWD' }}</span>
+      <div class="modal-body">
+        <!-- Order Details -->
+        <div class="order-details">
+          <h4>تفاصيل الطلب</h4>
+          <div class="detail-row">
+            <span class="label">العميل:</span>
+            <span>{{ selectedOrder.customerName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">البريد الإلكتروني:</span>
+            <span>{{ selectedOrder.customerEmail }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">المبلغ:</span>
+            <span>{{ selectedOrder.totalAmount | currency:'KWD' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">الحالة الحالية:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(selectedOrder.orderStatus)">
+              {{ getStatusText(selectedOrder.orderStatus) }}
+            </span>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Action Forms -->
-    <div class="action-forms">
-      <!-- Update Status Form -->
-      <div class="form-section" *ngIf="canUpdateStatus(selectedOrder)">
-        <h4>تحديث حالة الطلب</h4>
-        <form [formGroup]="statusForm" (ngSubmit)="updateOrderStatus()">
-          <div class="form-group">
-            <label for="status">الحالة الجديدة:</label>
-            <select id="status" formControlName="status">
-              <option *ngFor="let status of orderStatuses" [value]="status.value">
-                {{ status.label }}
-              </option>
-            </select>
+        <!-- Order Items -->
+        <div class="order-items">
+          <h4>المنتجات المطلوبة</h4>
+          <div class="items-list">
+            <div *ngFor="let item of selectedOrder.orderItems" class="item">
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-quantity">x{{ item.quantity }}</span>
+              <span class="item-price">{{ item.unitPrice | currency:'KWD' }}</span>
+            </div>
           </div>
-          <button type="submit" class="btn-primary" [disabled]="!statusForm.valid || loading">
-            تحديث الحالة
-          </button>
-        </form>
-      </div>
+        </div>
 
-      <!-- Payment Status Form -->
-      <div class="form-section" *ngIf="canUpdatePaymentStatus(selectedOrder)">
-        <h4>تحديث حالة الدفع</h4>
-        <form [formGroup]="paymentStatusForm" (ngSubmit)="updatePaymentStatus()">
-          <div class="form-group">
-            <label for="paymentStatus">حالة الدفع الجديدة:</label>
-            <select id="paymentStatus" formControlName="status">
-              <option *ngFor="let status of paymentStatuses" [value]="status.value">
-                {{ status.label }}
-              </option>
-            </select>
+        <!-- Management Forms -->
+        <div class="management-forms">
+          <!-- Update Order Status -->
+          <div class="form-section">
+            <h4>تحديث حالة الطلب</h4>
+            <form [formGroup]="statusForm" (ngSubmit)="updateOrderStatus()">
+              <div class="form-group">
+                <select formControlName="status" class="form-control">
+                  <option *ngFor="let status of orderStatuses" [value]="status.value">
+                    {{ status.label }}
+                  </option>
+                </select>
+                <button type="submit" class="btn btn-primary" [disabled]="!statusForm.valid || loading">
+                  تحديث الحالة
+                </button>
+              </div>
+            </form>
           </div>
-          <button type="submit" class="btn-primary" [disabled]="!paymentStatusForm.valid || loading">
-            تحديث حالة الدفع
-          </button>
-        </form>
-      </div>
 
-      <!-- Tracking Form -->
-      <div class="form-section" *ngIf="canAddTracking(selectedOrder)">
-        <h4>إضافة/تحديث معلومات التتبع</h4>
-        <form [formGroup]="trackingForm" (ngSubmit)="updateTrackingInfo()">
-          <div class="form-group">
-            <label for="trackingNumber">رقم التتبع:</label>
-            <input type="text" id="trackingNumber" formControlName="trackingNumber">
+          <!-- Update Payment Status -->
+          <div class="form-section">
+            <h4>تحديث حالة الدفع</h4>
+            <form [formGroup]="paymentStatusForm" (ngSubmit)="updatePaymentStatus()">
+              <div class="form-group">
+                <select formControlName="status" class="form-control">
+                  <option *ngFor="let status of paymentStatuses" [value]="status.value">
+                    {{ status.label }}
+                  </option>
+                </select>
+                <button type="submit" class="btn btn-primary" [disabled]="!paymentStatusForm.valid || loading">
+                  تحديث حالة الدفع
+                </button>
+              </div>
+            </form>
           </div>
-          <div class="form-group">
-            <label for="carrier">شركة الشحن:</label>
-            <input type="text" id="carrier" formControlName="carrier">
-          </div>
-          <button type="submit" class="btn-primary" [disabled]="!trackingForm.valid || loading">
-            تحديث التتبع
-          </button>
-        </form>
-      </div>
 
-      <!-- Refund Form -->
-      <div class="form-section" *ngIf="canRefund(selectedOrder)">
-        <h4>استرداد الطلب</h4>
-        <form [formGroup]="refundForm" (ngSubmit)="refundOrder()">
-          <div class="form-group">
-            <label for="reason">سبب الاسترداد:</label>
-            <textarea id="reason" formControlName="reason" rows="3"></textarea>
+          <!-- Add Tracking Info -->
+          <div class="form-section" *ngIf="canAddTracking(selectedOrder)">
+            <h4>إضافة معلومات التتبع</h4>
+            <form [formGroup]="trackingForm" (ngSubmit)="updateTrackingInfo()">
+              <div class="form-group">
+                <input type="text" formControlName="trackingNumber" placeholder="رقم التتبع" class="form-control">
+              </div>
+              <div class="form-group">
+                <input type="text" formControlName="carrier" placeholder="شركة الشحن" class="form-control">
+              </div>
+              <button type="submit" class="btn btn-primary" [disabled]="!trackingForm.valid || loading">
+                إضافة التتبع
+              </button>
+            </form>
           </div>
-          <button type="submit" class="btn-danger" [disabled]="!refundForm.valid || loading">
-            استرداد الطلب
-          </button>
-        </form>
+
+          <!-- Refund Order -->
+          <div class="form-section" *ngIf="canRefund(selectedOrder)">
+            <h4>استرداد الطلب</h4>
+            <form [formGroup]="refundForm" (ngSubmit)="refundOrder()">
+              <div class="form-group">
+                <textarea formControlName="reason" placeholder="سبب الاسترداد" class="form-control"></textarea>
+              </div>
+              <button type="submit" class="btn btn-danger" [disabled]="!refundForm.valid || loading">
+                استرداد الطلب
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
