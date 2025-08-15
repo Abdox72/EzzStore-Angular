@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Nl2brPipe } from "../../pipes/nl2br.pipe";
 import { LinkifyPipe } from "../../pipes/linkify.pipe";
 import { BehaviorSubject } from 'rxjs';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-chatbot',
@@ -32,6 +33,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   constructor(
     private chatbotService: ChatbotService,
+    private chatService: ChatService,
     private toastr: ToastrService
   ) { }
 
@@ -121,39 +123,20 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     this.currentMessage = '';
     this.isLoading = true;
 
-    // Send to chatbot service with conversation ID and context
-    this.chatbotService.sendMessage(userMessage, this.conversationId, this.context).subscribe({
-      next: (response) => {
-        // Update conversation ID and context if returned from server
-        if (response.conversation_id) {
-          this.conversationId = response.conversation_id;
-          localStorage.setItem(this.STORAGE_KEY_CONVERSATION_ID, this.conversationId);
-        }
-
-        if (response.context) {
-          this.context = response.context;
-          localStorage.setItem(this.STORAGE_KEY_CONTEXT, JSON.stringify(this.context));
-        }
-
-        // Extract metadata from response if needed
-         const botMetadata = this.chatbotService.extractMetadata ? this.chatbotService.extractMetadata(response.reply) : undefined;
-
+    // Call new backend Chat API
+    this.chatService.ask(userMessage).subscribe({
+      next: (res) => {
+        const answer = res?.answer || 'تمت معالجة سؤالك.';
         this.messages.push({
-          content: response.reply,
+          content: answer,
           isUser: false,
-          timestamp: new Date(),
-          metadata: botMetadata
+          timestamp: new Date()
         });
         this.isLoading = false;
         this.saveChatHistory();
-        
-        // Update suggestions if provided
-        if (response.suggestions && response.suggestions.length > 0) {
-          // this.suggestions = response.suggestions;
-        }
       },
       error: (error) => {
-        console.error('Chatbot error:', error);
+        console.error('Chat error:', error);
         this.messages.push({
           content: 'عذراً، حدث خطأ أثناء معالجة رسالتك. يرجى المحاولة مرة أخرى.',
           isUser: false,
