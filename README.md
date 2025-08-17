@@ -9,7 +9,7 @@ Ezz هو تطبيق تجارة إلكترونية حديث مبني بـ Angular
 ## 🎥 فيديو توضيحي
 
 <!-- أضف رابط الفيديو هنا -->
-[![شاهد الفيديو التوضيحي](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![شاهد الفيديو التوضيحي]([https://img.youtube.com/vi/VIDEO_ID/0.jpg](https://drive.google.com/drive/folders/1xfyJjqauAKvKS2ohfz2D75_HnJjYiM_O))]
 
 *أو يمكنك إضافة الفيديو مباشرة:*
 
