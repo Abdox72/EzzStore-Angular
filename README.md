@@ -10,6 +10,7 @@ Ezz هو تطبيق تجارة إلكترونية حديث مبني بـ Angular
 
 <!-- أضف رابط الفيديو هنا -->
 [تحميل/تشغيل الفيديو](public/freecompress-EzzStore_Demo - Made with Clipchamp.mp4)
+[شاهد الفيديو على Google Drive](https://drive.google.com/drive/folders/1xfyJjqauAKvKS2ohfz2D75_HnJjYiM_O)
 
 *أو يمكنك إضافة الفيديو مباشرة:*
 
