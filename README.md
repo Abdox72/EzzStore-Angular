@@ -15,7 +15,7 @@ Ezz هو تطبيق تجارة إلكترونية حديث مبني بـ Angular
 
 ```html
 <video width="100%" controls>
-  <source src="path/to/your/video.mp4" type="video/mp4">
+  <source src="public/freecompress-EzzStore_Demo - Made with Clipchamp.mp4" type="video/mp4">
   متصفحك لا يدعم عرض الفيديو.
 </video>
 ```
