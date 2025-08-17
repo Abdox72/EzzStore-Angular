@@ -148,6 +148,7 @@
   align-items: center;
   gap: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: auto;
 }
 
 .stat-card:hover {

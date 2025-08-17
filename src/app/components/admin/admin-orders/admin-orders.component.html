@@ -153,7 +153,7 @@
                 <div class="customer-phone">{{ order.customerPhone }}</div>
               </div>
             </td>
-            <td class="amount">{{ order.totalAmount | currency:'KWD' }}</td>
+            <td class="amount">{{ order.totalAmount | currency:'KWD':'symbol':'1.1-1' }}</td>
             <td>
               <span class="status-badge" [ngClass]="getStatusClass(order.orderStatus)">
                 {{ getStatusText(order.orderStatus) }}
@@ -231,7 +231,7 @@
           </div>
           <div class="detail-row">
             <span class="label">المبلغ:</span>
-            <span>{{ selectedOrder.totalAmount | currency:'KWD' }}</span>
+            <span>{{ selectedOrder.totalAmount | currency:'KWD':'symbol':'1.1-1' }}</span>
           </div>
           <div class="detail-row">
             <span class="label">الحالة الحالية:</span>
@@ -248,7 +248,7 @@
             <div *ngFor="let item of selectedOrder.orderItems" class="item">
               <span class="item-name">{{ item.productName }}</span>
               <span class="item-quantity">x{{ item.quantity }}</span>
-              <span class="item-price">{{ item.unitPrice | currency:'KWD' }}</span>
+              <span class="item-price">{{ item.unitPrice | currency:'KWD':'symbol':'1.1-1' }}</span>
             </div>
           </div>
         </div>

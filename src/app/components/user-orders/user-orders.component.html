@@ -78,7 +78,7 @@
               <span class="material-icons">shopping_cart</span>
               {{ getTotalItems(order) }} منتج
             </span>
-            <span class="total-amount">{{ order.totalAmount | currency:'KWD' }}</span>
+            <span class="total-amount">{{ order.totalAmount | currency:'KWD':'symbol':'1.1-1' }}</span>
           </div>
           <div class="payment-info">
             <span class="payment-method">
@@ -343,8 +343,8 @@
               <span class="product-quantity">{{ item.quantity }}</span>
             </div>
             <div class="product-price">
-              <span class="unit-price">سعر الوحدة: {{ item.unitPrice | currency:'KWD' }}</span>
-              <span class="total-price">{{ item.totalPrice | currency:'KWD' }}</span>
+              <span class="unit-price">سعر الوحدة: {{ item.unitPrice | currency:'KWD':'symbol':'1.1-1' }}</span>
+              <span class="total-price">{{ item.totalPrice | currency:'KWD':'symbol':'1.1-1' }}</span>
             </div>
           </div>
         </div>
@@ -353,7 +353,7 @@
             <span class="material-icons">calculate</span>
             المجموع:
           </span>
-          <span class="total-amount">{{ selectedOrder.totalAmount | currency:'KWD' }}</span>
+          <span class="total-amount">{{ selectedOrder.totalAmount | currency:'KWD':'symbol':'1.1-1' }}</span>
         </div>
       </div>
     </div>

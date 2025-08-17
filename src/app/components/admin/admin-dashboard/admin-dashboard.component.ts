@@ -131,12 +131,19 @@ export class AdminDashboardComponent implements OnInit {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('ar-kw', {
       style: 'currency',
-      currency: 'KWD'
+      currency: 'KWD',
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
     }).format(amount);
   }
 
   getRevenueChartData(): any[] {
     return this.dashboardData?.revenueChart || [];
+  }
+
+  getBarHeight(revenue: number): number {
+    const maxRevenue = Math.max(...this.getRevenueChartData().map(d => d.revenue));
+  return (revenue / maxRevenue) * 150;
   }
 
   getOrderStatusChartData(): any[] {

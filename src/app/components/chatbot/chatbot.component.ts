@@ -123,10 +123,34 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     this.currentMessage = '';
     this.isLoading = true;
 
-    // Call new backend Chat API
-    this.chatService.ask(userMessage).subscribe({
+    // If the user asks for forecasting, route to chat service forecasting endpoint
+    const lower = userMessage.toLowerCase();
+    const forecastKeywords = ['توقع', 'توقُّعات', 'توقُّعات', 'تنبؤ', 'الشهر القادم', 'القادم', 'المقبل'];
+    const isForecast = forecastKeywords.some(k => lower.includes(k));
+
+    if (isForecast) {
+      this.chatService.forecastNextMonth(undefined, 5).subscribe({
+        next: (res) => {
+          const answer = res?.answer || 'لا تتوفر بيانات كافية للتوقع.';
+          this.messages.push({ content: answer, isUser: false, timestamp: new Date() });
+          this.isLoading = false;
+          this.saveChatHistory();
+        },
+        error: (error) => {
+          console.error('Forecast error:', error);
+          this.messages.push({ content: 'تعذر توليد توقع الآن.', isUser: false, timestamp: new Date() });
+          this.isLoading = false;
+          this.saveChatHistory();
+          this.toastr.error('فشل في التوقع', 'خطأ');
+        }
+      });
+      return;
+    }
+
+    // Otherwise call RAG Chat endpoint with history
+    this.chatbotService.sendMessage(userMessage, this.messages, undefined).subscribe({
       next: (res) => {
-        const answer = res?.answer || 'تمت معالجة سؤالك.';
+        const answer = res?.reply || 'تمت معالجة سؤالك.';
         this.messages.push({
           content: answer,
           isUser: false,

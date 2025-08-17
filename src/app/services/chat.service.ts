@@ -28,6 +28,14 @@ export class ChatService {
     return this.http.post<ChatAskResponse>(`${this.apiUrl}/ask`, body);
   }
 
+  forecastNextMonth(category?: string, top: number = 5): Observable<ChatAskResponse> {
+    const params = new URLSearchParams();
+    if (category) params.append('category', category);
+    params.append('top', String(top));
+    const query = params.toString();
+    return this.http.get<ChatAskResponse>(`${this.apiUrl}/forecast-next-month${query ? ('?' + query) : ''}`);
+  }
+
   // Optional: direct endpoints if needed later
   getTopSelling(category?: string): Observable<ChatAskResponse> {
     const url = category ? `${this.apiUrl}/top-selling?category=${encodeURIComponent(category)}` : `${this.apiUrl}/top-selling`;

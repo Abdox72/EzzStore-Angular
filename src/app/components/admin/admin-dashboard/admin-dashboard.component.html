@@ -117,7 +117,7 @@
         <h3>الإيرادات اليومية</h3>
         <div class="revenue-chart">
           <div *ngFor="let item of getRevenueChartData()" class="chart-bar">
-            <div class="bar" [style.height.px]="item.revenue / 10"></div>
+            <div class="bar" [style.height.px]="getBarHeight(item.revenue)"></div>
             <span class="bar-label">{{ item.period }}</span>
             <span class="bar-value">{{ formatCurrency(item.revenue) }}</span>
           </div>

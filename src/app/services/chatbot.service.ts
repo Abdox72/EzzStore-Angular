@@ -5,8 +5,8 @@ import { environment } from '../../environments/environment';
 
 export interface ChatbotRequest {
   message: string;
-  conversation_id?: string;
-  context?: any;
+  conversationHistory?: { content: string; isUser: boolean; timestamp: string }[];
+  userId?: string;
 }
 
 export interface ChatbotResponse {
@@ -32,17 +32,29 @@ export interface ChatMessage {
   providedIn: 'root'
 })
 export class ChatbotService {
-  private apiUrl = `${environment.apiUrl}/chatbot`;
+  private apiUrl = `${environment.apiUrl}/rag`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    // Warmup: trigger status and reindex once per load
+    this.http.get(`${this.apiUrl}/status`).subscribe({
+      next: () => {
+        this.http.post(`${this.apiUrl}/reindex`, {}).subscribe({ next: () => {}, error: () => {} });
+      },
+      error: () => {}
+    });
+  }
 
-  sendMessage(message: string, conversationId?: string, context?: any): Observable<ChatbotResponse> {
+  sendMessage(message: string, history: ChatMessage[], userId?: string): Observable<ChatbotResponse> {
     const request: ChatbotRequest = { 
       message,
-      conversation_id: conversationId,
-      context: context
+      conversationHistory: history.map(h => ({
+        content: h.content,
+        isUser: h.isUser,
+        timestamp: (h.timestamp instanceof Date ? h.timestamp.toISOString() : new Date(h.timestamp).toISOString())
+      })),
+      userId
     };
-    return this.http.post<ChatbotResponse>(`${this.apiUrl}`, request);
+    return this.http.post<ChatbotResponse>(`${this.apiUrl}/chat`, request);
   }
   
   // استخراج البيانات الوصفية من الرسالة

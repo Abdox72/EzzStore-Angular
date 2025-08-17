@@ -127,7 +127,7 @@
             </td>
             <td class="product-name">{{ product.title }}</td>
             <td class="product-description">{{ product.description }}</td>
-            <td class="product-price">{{ product.price | currency:'KWD' }}</td>
+            <td class="product-price">{{ product.price | currency:'KWD':'symbol':'1.1-1' }}</td>
             <td class="product-stock">
               <span [class]="product.stock > 0 ? 'in-stock' : 'out-of-stock'">
                 {{ product.stock }}
@@ -231,7 +231,7 @@
             <input type="file" id="images" (change)="onImageChange($event)" 
                    class="form-control" multiple accept="image/*">
             <div *ngIf="imagePreview" class="image-preview">
-              <img [src]="imagePreview" alt="معاينة الصورة">
+              <img [src]="staticFiles+imagePreview" alt="معاينة الصورة">
             </div>
           </div>
 
